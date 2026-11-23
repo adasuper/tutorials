@@ -222,6 +222,7 @@ td code { white-space: nowrap; }
 .ex li { counter-increment: ex; position: relative; padding-left: 40px; margin-bottom: 14px; }
 .ex li::before { content: "E" counter(ex); position: absolute; left: 0; top: 1px; font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--accent); }
 
+.downloads a { font-family: var(--font-mono); font-size: .9em; font-weight: 600; overflow-wrap: anywhere; }
 footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
 footer .copyright { margin: 12px 0 0; color: var(--ink); }
 </style>
@@ -301,11 +302,12 @@ footer .copyright { margin: 12px 0 0; color: var(--ink); }
         <p>Test the API only through Postman. Do not open or read the server code. Your expected results come from the specification below, not from the implementation.</p>
       </div>
       <h3>Files you need</h3>
-      <p>Get these two files (for example from your instructor or course site) and save both in one folder, such as <code>crud-lab</code>:</p>
-      <ul>
-        <li><code>student_api.py</code>: the API server, which runs both builds</li>
-        <li><code>CRUD-Lab-Starter.postman_collection.json</code>: a Postman collection with a reset request and one worked example</li>
+      <p>Download both starter files and save them in one folder, such as <code>crud-lab</code>:</p>
+      <ul class="downloads">
+        <li><a href="files/student_api.py" download>student_api.py</a>: the API server, which runs both builds. It uses only the Python standard library, so there is nothing else to install.</li>
+        <li><a href="files/CRUD-Lab-Starter.postman_collection.json" download>CRUD-Lab-Starter.postman_collection.json</a>: a Postman collection with a reset request and one worked example</li>
       </ul>
+      <p>If your browser opens a file instead of saving it, right-click the link and choose <b>Save link as</b>. Keep the file names exactly as shown.</p>
       <h3>Specification</h3>
       <div class="table-wrap"><table>
         <thead><tr><th>Operation</th><th>Method and URL</th><th>Success code</th><th>Failure codes</th></tr></thead>
@@ -373,7 +375,7 @@ Press Ctrl+C to stop.</code></pre></figure>
       <p>A <b>collection</b> is a folder of saved requests. Each request can carry test code, and the whole collection can be exported as one file to share or back up.</p>
       <ol>
         <li><b>Import.</b> In Postman, click <b>Import</b> (top of the left sidebar, next to <b>New</b>), or press <kbd>Ctrl</kbd>+<kbd>O</kbd>. Drag <code>CRUD-Lab-Starter.postman_collection.json</code> onto the import window, or click <b>files</b> and pick it.</li>
-        <li><b>Open it.</b> In the left sidebar under <b>Collections</b>, click the arrow next to the starter collection. You should see five folders:</li>
+        <li><b>Open it.</b> In the left sidebar under <b>Collections</b>, click the arrow next to <b>CRUD Lab - Starter</b>. You should see five folders:</li>
       </ol>
       <div class="table-wrap"><table>
         <thead><tr><th>Folder</th><th>What is in it</th></tr></thead>

@@ -1,0 +1,147 @@
+{
+  "info": {
+    "_postman_id": "1d4abd5f-7ca5-4d31-9fc4-734c28513b44",
+    "name": "CRUD Lab - Starter",
+    "description": "Student Enrollment API - CRUD testing lab.\n\n1. Start the server: python student_api.py\n2. Collection variable baseUrl = http://localhost:3000 (build 1.0).\n3. Send 'Reset test data' first.\n4. Add your requests + Post-response tests to the Read, Update and Delete folders (and more to Create).\n5. When everything passes on build 1.0, change baseUrl to http://localhost:3001 (build 1.1), reset, and run again. Every failing test is a defect report.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0 Setup",
+      "item": [
+        {
+          "name": "Reset test data",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "reset"
+              ]
+            },
+            "description": "Restores Alice (1001), Bob (1002), Chen (1003). Send this before each test run."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1 Create",
+      "item": [
+        {
+          "name": "C-ex  Create student with invalid age (15)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/students",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 2001,\n  \"name\": \"Bob\",\n  \"age\": 15\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Expected output: 400 Bad Request",
+                  "pm.test(\"Status is 400\", () => pm.response.to.have.status(400));",
+                  "",
+                  "// The error response should explain what went wrong",
+                  "pm.test(\"Error message mentions age\", () => {",
+                  "    const body = pm.response.json();",
+                  "    pm.expect(body.error).to.include(\"age\");",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "C-ex  (postcondition) No student 2001 was created",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/students/2001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "students",
+                "2001"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Postcondition: the rejected student must NOT be in the database",
+                  "pm.test(\"Status is 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        }
+      ],
+      "description": "Worked example from the test-case table. Add your own Create tests below it."
+    },
+    {
+      "name": "2 Read",
+      "item": [],
+      "description": "Add at least 2 Read tests."
+    },
+    {
+      "name": "3 Update",
+      "item": [],
+      "description": "Add at least 2 Update tests."
+    },
+    {
+      "name": "4 Delete",
+      "item": [],
+      "description": "Add at least 2 Delete tests."
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ]
+}
