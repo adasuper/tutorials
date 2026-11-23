@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API Testing with Postman</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body { margin: 0; }
+
+/* Layout: engineering-notebook tutorial; sticky step rail on wide screens, one reading column, code blocks as dark "terminal" panes, amber marks every human review gate */
+:root {
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --ink: #15201d;
+  --muted: #55635f;
+  --line: #d3dcd9;
+  --accent: #0b6b5c;
+  --accent-soft: #d6ebe6;
+  --gate: #8a5a00;
+  --gate-soft: #f8ecd2;
+  --code-bg: #121c1a;
+  --code-fg: #dfe8e5;
+  --code-head: #1b2826;
+  --code-muted: #8ba19b;
+  --prompt-bg: #f6f2fb;
+  --prompt-line: #d8cdea;
+  --prompt-ink: #4b3a6b;
+  --hl-key: #7fd1c0;
+  --hl-str: #f2c879;
+  --hl-num: #f29f8a;
+  --hl-com: #7f948f;
+  --hl-fn: #a9c7ff;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1514; --surface: #161f1d; --ink: #e2eae7; --muted: #9aaaa5; --line: #2a3633;
+    --accent: #55c4ae; --accent-soft: #173a33; --gate: #e5ad48; --gate-soft: #33280f;
+    --code-bg: #0a100f; --code-fg: #dfe8e5; --code-head: #121b19; --code-muted: #8ba19b;
+    --prompt-bg: #1d1a26; --prompt-line: #3b3352; --prompt-ink: #cbbbf0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1514; --surface: #161f1d; --ink: #e2eae7; --muted: #9aaaa5; --line: #2a3633;
+  --accent: #55c4ae; --accent-soft: #173a33; --gate: #e5ad48; --gate-soft: #33280f;
+  --code-bg: #0a100f; --code-fg: #dfe8e5; --code-head: #121b19; --code-muted: #8ba19b;
+  --prompt-bg: #1d1a26; --prompt-line: #3b3352; --prompt-ink: #cbbbf0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.62;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
+}
+
+.shell {
+  max-width: 1180px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr; gap: 40px;
+}
+@media (min-width: 1060px) { .shell { grid-template-columns: 230px minmax(0, 1fr); } }
+
+/* Step rail */
+.rail { display: none; }
+@media (min-width: 1060px) {
+  .rail {
+    display: block; position: sticky; top: env(safe-area-inset-top, 0px);
+    align-self: start; max-height: 100vh; overflow-y: auto; padding-block: 40px 24px;
+  }
+}
+.rail h2 { font-family: var(--font-display); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.rail ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
+.rail a {
+  display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: baseline;
+  padding: 5px 8px; border-radius: 6px; text-decoration: none; color: var(--muted); font-size: 15px; line-height: 1.3;
+}
+.rail a:hover { background: var(--accent-soft); color: var(--ink); }
+.rail a.active { color: var(--ink); background: var(--accent-soft); font-weight: 600; }
+.rail .n { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.rail .done-mark { color: var(--accent); }
+
+.mobile-toc { margin-block: 20px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.mobile-toc summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+.mobile-toc ol { margin: 0; padding: 0 14px 12px 36px; }
+@media (min-width: 1060px) { .mobile-toc { display: none; } }
+
+main { min-width: 0; max-width: 820px; }
+
+/* Header */
+header.hero { padding-block: 48px 24px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: var(--font-mono); font-size: 13px; letter-spacing: .04em; color: var(--accent); margin: 0 0 10px; }
+h1 {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.04; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance;
+}
+.lede { font-size: 20px; color: var(--muted); max-width: 62ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 15px; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 600; }
+
+/* Sections */
+section { padding-block: 44px 8px; scroll-margin-top: 16px; }
+h2 {
+  font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.15;
+  letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance;
+  display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+}
+h2 .step { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--accent); letter-spacing: .02em; }
+h3 { font-family: var(--font-display); font-weight: 500; font-size: 21px; margin: 32px 0 8px; text-wrap: balance; }
+p, li { max-width: 68ch; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 22px; margin: 0 0 16px; }
+li { margin-bottom: 6px; }
+code:not(pre code) {
+  font-family: var(--font-mono); font-size: .86em; background: var(--accent-soft);
+  padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere;
+}
+kbd { font-family: var(--font-mono); font-size: .82em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--surface); }
+.goal { font-size: 18px; color: var(--muted); }
+
+/* Workflow track */
+.track {
+  list-style: none; padding: 0; margin: 22px 0 10px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;
+}
+.track li {
+  max-width: none; margin: 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start;
+}
+.track .k { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.track .t { font-weight: 700; line-height: 1.25; }
+.track .a { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.track .g { font-size: 13.5px; color: var(--gate); line-height: 1.35; border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 4px; }
+.loopnote { font-size: 15px; color: var(--muted); }
+
+/* Code */
+figure { margin: 18px 0 22px; }
+figure.code, figure.prompt { border-radius: 8px; overflow: hidden; }
+figure.code { background: var(--code-bg); }
+figure figcaption {
+  display: flex; align-items: center; gap: 12px; padding: 7px 8px 7px 14px;
+  font-family: var(--font-mono); font-size: 12.5px;
+}
+figure.code figcaption { background: var(--code-head); color: var(--code-muted); }
+figcaption .file { color: var(--code-fg); font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+figcaption .lang { margin-left: auto; white-space: nowrap; }
+button.copy {
+  font: 600 12.5px var(--font-body); cursor: pointer; border-radius: 5px; padding: 4px 11px;
+  border: 1px solid #3a4b47; background: transparent; color: var(--code-fg); white-space: nowrap;
+}
+button.copy:hover { background: #2a3a37; }
+button.copy.ok { border-color: var(--hl-key); color: var(--hl-key); }
+pre { margin: 0; overflow-x: auto; padding: 14px 16px; }
+pre code { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.6; color: var(--code-fg); white-space: pre; tab-size: 2; }
+
+figure.prompt { background: var(--prompt-bg); border: 1px solid var(--prompt-line); }
+figure.prompt figcaption { color: var(--prompt-ink); border-bottom: 1px solid var(--prompt-line); }
+figure.prompt .mode { font-weight: 600; }
+figure.prompt .cost { margin-left: auto; font-size: 11.5px; opacity: .85; white-space: nowrap; }
+figure.prompt button.copy { color: var(--prompt-ink); border-color: var(--prompt-line); }
+figure.prompt button.copy:hover { background: var(--prompt-line); }
+figure.prompt pre code { color: var(--ink); white-space: pre-wrap; font-size: 13.5px; }
+@media (max-width: 520px) { figure.prompt .cost { display: none; } }
+
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-literal, .hljs-tag .hljs-name, .hljs-meta .hljs-keyword { color: var(--hl-key); }
+.hljs-string, .hljs-attr, .hljs-template-variable, .hljs-variable, .hljs-template-tag { color: var(--hl-str); }
+.hljs-number, .hljs-symbol, .hljs-bullet { color: var(--hl-num); }
+.hljs-comment, .hljs-quote, .hljs-meta { color: var(--hl-com); font-style: italic; }
+.hljs-title, .hljs-section, .hljs-function .hljs-title, .hljs-title.function_, .hljs-attribute { color: var(--hl-fn); }
+.hljs-params, .hljs-subst { color: var(--code-fg); }
+
+/* Callouts */
+.gate, .note {
+  border-radius: 8px; padding: 14px 16px 4px; margin: 20px 0;
+}
+.gate { background: var(--gate-soft); border: 1px solid color-mix(in srgb, var(--gate) 35%, transparent); }
+.note { background: var(--surface); border: 1px solid var(--line); }
+.gate .label, .note .label {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  margin: 0 0 6px; font-weight: 600;
+}
+.gate .label { color: var(--gate); }
+.note .label { color: var(--accent); }
+.gate ul, .note ul { margin-bottom: 10px; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 16px 0 22px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 500; font-size: 14px; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+
+/* Pipeline strip */
+.pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 16px 0 22px; font-family: var(--font-mono); font-size: 13px; }
+.pipeline .job { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px 4px 8px; }
+.pipeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.pipeline .job.manual .dot { background: transparent; border: 2px solid var(--gate); }
+.pipeline .arrow { color: var(--muted); }
+
+/* Checkpoint */
+.checkpoint {
+  display: flex; gap: 10px; align-items: center; margin: 26px 0 0; padding: 10px 14px;
+  border: 1px dashed var(--line); border-radius: 8px; font-size: 15px; color: var(--muted);
+}
+.checkpoint input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.checkpoint label { cursor: pointer; }
+
+.ex { counter-reset: ex; list-style: none; padding: 0; }
+.ex li { counter-increment: ex; position: relative; padding-left: 40px; margin-bottom: 14px; }
+.ex li::before { content: "E" counter(ex); position: absolute; left: 0; top: 1px; font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--accent); }
+
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+footer .copyright { margin: 12px 0 0; color: var(--ink); }
+</style>
+
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Tutorial steps">
+    <h2>Walkthrough</h2>
+    <ol id="rail-list">
+      <li><a href="#overview"><span class="n">&#xb7;&#xb7;</span><span>Overview</span></a></li>
+      <li><a href="#api"><span class="n">&#xb7;&#xb7;</span><span>The API under test</span></a></li>
+      <li><a href="#setup"><span class="n">01</span><span>Install Python and Postman</span></a></li>
+      <li><a href="#server"><span class="n">02</span><span>Start the API server</span></a></li>
+      <li><a href="#import"><span class="n">03</span><span>Import the starter collection</span></a></li>
+      <li><a href="#first"><span class="n">04</span><span>Send your first requests</span></a></li>
+      <li><a href="#write"><span class="n">05</span><span>Write your own tests</span></a></li>
+      <li><a href="#run"><span class="n">06</span><span>Run on build 1.0</span></a></li>
+      <li><a href="#hunt"><span class="n">07</span><span>Hunt defects in build 1.1</span></a></li>
+      <li><a href="#wrap"><span class="n">08</span><span>Export and wrap up</span></a></li>
+      <li><a href="#troubleshooting"><span class="n">&#xb7;&#xb7;</span><span>Troubleshooting</span></a></li>
+      <li><a href="#cheatsheet"><span class="n">&#xb7;&#xb7;</span><span>Assertion cheat sheet</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="overview">
+      <p class="eyebrow"><a href="../">&#x2190; All tutorials</a></p>
+      <h1>Testing a CRUD API with Postman</h1>
+      <p class="lede">You will turn CRUD test cases into automated tests in Postman, prove they pass on a correct build of a Student Enrollment API, then use the same tests to find defects in a new build.</p>
+      <ul class="facts">
+        <li><b>Tools</b> Postman desktop app &#xb7; Python 3.7+</li>
+        <li><b>Technique</b> Black-box API testing &#xb7; CRUD &#xb7; regression testing</li>
+        <li><b>Time</b> about 2 hours</li>
+      </ul>
+      <details class="mobile-toc">
+        <summary>Contents</summary>
+        <ol>
+          <li><a href="#api">The API under test</a></li>
+          <li><a href="#setup">Step 1 &#xb7; Install Python and Postman</a></li>
+          <li><a href="#server">Step 2 &#xb7; Start the API server</a></li>
+          <li><a href="#import">Step 3 &#xb7; Import the starter collection</a></li>
+          <li><a href="#first">Step 4 &#xb7; Send your first requests</a></li>
+          <li><a href="#write">Step 5 &#xb7; Write your own tests</a></li>
+          <li><a href="#run">Step 6 &#xb7; Run on build 1.0</a></li>
+          <li><a href="#hunt">Step 7 &#xb7; Hunt defects in build 1.1</a></li>
+          <li><a href="#wrap">Step 8 &#xb7; Export and wrap up</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#cheatsheet">Assertion cheat sheet</a></li>
+        </ol>
+      </details>
+    </header>
+
+    <section>
+      <h3 style="margin-top:0">Who this tutorial is for</h3>
+      <p>Undergraduate software engineering students who have designed test cases on paper and want to automate them. You will practise black-box testing of a REST API: checking status codes, response bodies and postconditions, and using one test suite against two builds to catch regressions.</p>
+      <h3>What you will have at the end</h3>
+      <ul>
+        <li>A Postman collection with automated tests for Create, Read, Update and Delete, each checking status, body and postconditions</li>
+        <li>Proof that every test passes on the correct build</li>
+        <li>A defect log for the release-candidate build, with the evidence for each defect</li>
+      </ul>
+    </section>
+
+    <section id="api">
+      <h2>The API under test</h2>
+      <p>The tutorial uses two builds of the same Student Enrollment API. Both run on your own computer:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Build</th><th>Address</th><th>What it is</th></tr></thead>
+        <tbody>
+          <tr><td><b>1.0</b></td><td><code>http://localhost:3000</code></td><td>Released build. It works correctly.</td></tr>
+          <tr><td><b>1.1</b></td><td><code>http://localhost:3001</code></td><td>Release candidate. It may contain defects. Your job is to find them.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gate">
+        <p class="label">Black-box testing</p>
+        <p>Test the API only through Postman. Do not open or read the server code. Your expected results come from the specification below, not from the implementation.</p>
+      </div>
+      <h3>Files you need</h3>
+      <p>Get these two files (for example from your instructor or course site) and save both in one folder, such as <code>crud-lab</code>:</p>
+      <ul>
+        <li><code>student_api.py</code>: the API server, which runs both builds</li>
+        <li><code>CRUD-Lab-Starter.postman_collection.json</code>: a Postman collection with a reset request and one worked example</li>
+      </ul>
+      <h3>Specification</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Operation</th><th>Method and URL</th><th>Success code</th><th>Failure codes</th></tr></thead>
+        <tbody>
+          <tr><td><b>Create</b></td><td><code>POST /students</code></td><td>201</td><td>409, 400</td></tr>
+          <tr><td><b>Read</b></td><td><code>GET /students/{id}</code></td><td>200</td><td>404, 400</td></tr>
+          <tr><td><b>Update</b></td><td><code>PUT /students/{id}</code></td><td>200</td><td>404, 400</td></tr>
+          <tr><td><b>Delete</b></td><td><code>DELETE /students/{id}</code></td><td>200</td><td>404, 400</td></tr>
+        </tbody>
+      </table></div>
+      <p>A student is <code>{"id": 1&#x2013;9999, "name": 1&#x2013;40 characters, "age": 16&#x2013;120}</code>.</p>
+      <ul>
+        <li>Invalid input or malformed JSON returns <b>400</b>.</li>
+        <li>Creating an id that already exists returns <b>409</b>.</li>
+        <li>GET, PUT or DELETE on a student that does not exist returns <b>404</b>.</li>
+        <li>A PUT body needs <code>name</code> and <code>age</code>; <code>id</code> is optional but must match the URL.</li>
+      </ul>
+      <p>After every reset the data is: <b>1001</b> Alice 20, <b>1002</b> Bob 22, <b>1003</b> Chen 19.</p>
+    </section>
+
+    <section id="setup">
+      <h2><span class="step">STEP 1</span>Install Python and Postman</h2>
+      <p class="goal">Goal: Python 3.7 or newer, and the Postman desktop app signed in with a free account.</p>
+      <ol>
+        <li><b>Check Python.</b> Open a terminal and run the command below. On Windows also try <code>py --version</code>; on macOS try <code>python3 --version</code>. If you see <code>Python 3.x.y</code> with x of 7 or higher, you are done with this step. Remember which command worked (<code>python</code>, <code>py</code> or <code>python3</code>).</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Terminal</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">python --version</code></pre></figure>
+      <ol start="2">
+        <li><b>Install Postman.</b> Download the desktop app from <a href="https://www.postman.com/downloads/" target="_blank" rel="noopener">postman.com/downloads</a> and install it.</li>
+        <li><b>Sign in.</b> Open Postman and create a free account or sign in. Skip any tour or team setup.</li>
+        <li><b>Find your workspace.</b> After sign-in you land in a workspace (usually <b>My Workspace</b>). The left sidebar lists <b>Collections</b>. That is where your tests will live.</li>
+      </ol>
+      <div class="note">
+        <p class="label">Use the desktop app</p>
+        <p>Postman in a web browser cannot reach <code>localhost</code> on your computer without an extra helper (the Postman Desktop Agent). The desktop app works out of the box.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-setup"><label for="cp-setup">Python reports 3.7 or newer, and the Postman desktop app is signed in.</label></div>
+    </section>
+
+    <section id="server">
+      <h2><span class="step">STEP 2</span>Start the API server</h2>
+      <p class="goal">Goal: both builds running locally, in a terminal window you keep open for the whole tutorial.</p>
+      <ol>
+        <li><b>Open a terminal in your lab folder</b> (PowerShell on Windows).</li>
+        <li><b>Start the server</b>, using the Python command that worked in Step 1:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; lab folder</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">python student_api.py</code></pre></figure>
+      <ol start="3">
+        <li><b>Check the output.</b> You should see:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Expected output</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">Student Enrollment API is running
+Build 1.0 (released)           http://localhost:3000
+Build 1.1 (release candidate)  http://localhost:3001
+Press Ctrl+C to stop.</code></pre></figure>
+      <ol start="4">
+        <li><b>Check it in a browser.</b> Open <a href="http://localhost:3000/students" target="_blank" rel="noopener"><code>http://localhost:3000/students</code></a>. You should see the three starting students as JSON. Your browser just sent a GET request. Postman does the same, but lets you choose any method, send a body and check the response automatically.</li>
+        <li><b>Leave the window open.</b> Each request you send appears in it as a log line, for example <code>[build 1.0] GET /students/1002 -&gt; 200</code>. That log is handy when something looks wrong. Pressing <kbd>Ctrl</kbd>+<kbd>C</kbd> or closing the window stops the server, and all data returns to the starting state the next time you start it.</li>
+      </ol>
+      <div class="checkpoint"><input type="checkbox" id="cp-server"><label for="cp-server">The server is running, and the browser shows Alice, Bob and Chen.</label></div>
+    </section>
+
+    <section id="import">
+      <h2><span class="step">STEP 3</span>Import the starter collection</h2>
+      <p class="goal">Goal: the starter collection open in Postman, pointing at build 1.0.</p>
+      <p>A <b>collection</b> is a folder of saved requests. Each request can carry test code, and the whole collection can be exported as one file to share or back up.</p>
+      <ol>
+        <li><b>Import.</b> In Postman, click <b>Import</b> (top of the left sidebar, next to <b>New</b>), or press <kbd>Ctrl</kbd>+<kbd>O</kbd>. Drag <code>CRUD-Lab-Starter.postman_collection.json</code> onto the import window, or click <b>files</b> and pick it.</li>
+        <li><b>Open it.</b> In the left sidebar under <b>Collections</b>, click the arrow next to the starter collection. You should see five folders:</li>
+      </ol>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Folder</th><th>What is in it</th></tr></thead>
+        <tbody>
+          <tr><td><b>0 Setup</b></td><td><b>Reset test data</b>: puts the three starting students back</td></tr>
+          <tr><td><b>1 Create</b></td><td>A worked example (invalid age) and its postcondition check</td></tr>
+          <tr><td><b>2 Read</b></td><td>Empty: your tests go here</td></tr>
+          <tr><td><b>3 Update</b></td><td>Empty: your tests go here</td></tr>
+          <tr><td><b>4 Delete</b></td><td>Empty: your tests go here</td></tr>
+        </tbody>
+      </table></div>
+      <ol start="3">
+        <li><b>Check the <code>baseUrl</code> variable.</b> Click the collection name itself, then the <b>Variables</b> tab. There is one variable, <code>baseUrl</code>, with the value <code>http://localhost:3000</code>. Every request uses <code>{{baseUrl}}</code> in its URL, so switching to build 1.1 later is a one-value change. If you see both <b>Initial value</b> and <b>Current value</b> columns, both should say <code>http://localhost:3000</code>.</li>
+      </ol>
+      <h3>The request screen</h3>
+      <p>Click <b>0 Setup &#x2192; Reset test data</b> to open it. These are the parts you will use:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Area</th><th>Where</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><b>Method</b></td><td>Dropdown left of the URL</td><td>GET, POST, PUT, DELETE</td></tr>
+          <tr><td><b>URL bar</b></td><td>Top middle</td><td>Where the request goes, for example <code>{{baseUrl}}/students/1002</code></td></tr>
+          <tr><td><b>Send</b></td><td>Blue button, right of the URL</td><td>Sends the request</td></tr>
+          <tr><td><b>Body</b> tab</td><td>Under the URL</td><td>The JSON you send with POST and PUT (choose <b>raw</b>, then <b>JSON</b>)</td></tr>
+          <tr><td><b>Scripts</b> tab</td><td>Under the URL</td><td><b>Post-response</b> holds your test code; it runs after each response</td></tr>
+          <tr><td><b>Response pane</b></td><td>Bottom half</td><td>Status (for example <code>200 OK</code>), response <b>Body</b>, and <b>Test Results</b></td></tr>
+        </tbody>
+      </table></div>
+      <div class="note">
+        <p class="label">Save often</p>
+        <p>A dot on a request's tab means unsaved changes. Save with <kbd>Ctrl</kbd>+<kbd>S</kbd> (<kbd>&#x2318;</kbd>+<kbd>S</kbd> on macOS). You can send unsaved requests, but unsaved changes are not exported.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-import"><label for="cp-import">The collection shows five folders, and baseUrl is http://localhost:3000.</label></div>
+    </section>
+
+    <section id="first">
+      <h2><span class="step">STEP 4</span>Send your first requests</h2>
+      <p class="goal">Goal: understand how a Postman test reads a response, passes, and fails.</p>
+      <ol>
+        <li><b>Reset the data.</b> Open <b>0 Setup &#x2192; Reset test data</b> and click <b>Send</b>. The response pane should show <code>200 OK</code> and a body like <code>{"message": "data reset", "count": 3}</code>. Send this request at the start of every test run, so every run starts from the same data.</li>
+        <li><b>Open the worked example.</b> Open <b>1 Create &#x2192; C-ex Create student with invalid age (15)</b>. It is a test case for the lower age boundary, automated.</li>
+        <li><b>Look at the input.</b> Click the <b>Body</b> tab. It is set to <b>raw</b> and <b>JSON</b>, and holds the test input:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Body &#xb7; raw &#xb7; JSON</span><span class="lang">JSON</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-json">{
+  "id": 2001,
+  "name": "Bob",
+  "age": 15
+}</code></pre></figure>
+      <ol start="4">
+        <li><b>Look at the test code.</b> Click <b>Scripts</b>, then <b>Post-response</b>. This JavaScript runs after the response arrives:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Scripts &#xb7; Post-response</span><span class="lang">JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-javascript">// Expected output: 400 Bad Request
+pm.test("Status is 400", () =&gt; pm.response.to.have.status(400));
+
+// The error response should explain what went wrong
+pm.test("Error message mentions age", () =&gt; {
+  const body = pm.response.json();
+  pm.expect(body.error).to.include("age");
+});</code></pre></figure>
+      <p>Each <code>pm.test("name", function)</code> is one check; the name is what you see in the results. Inside, <code>pm.response</code> is the response that came back, <code>pm.response.json()</code> turns its body into a JavaScript object, and <code>pm.expect(...)</code> states what must be true. If any line inside a <code>pm.test</code> fails, that check fails.</p>
+      <ol start="5">
+        <li><b>Send it.</b> Click <b>Send</b>. The status is <code>400 Bad Request</code> and the body is <code>{"error": "age must be an integer from 16 to 120"}</code>.</li>
+        <li><b>Read the results.</b> Click <b>Test Results</b> in the response pane. You should see two green <b>PASS</b> lines.</li>
+        <li><b>See a failure on purpose.</b> In the script, change <code>400</code> to <code>201</code> and click <b>Send</b> again. The first check now shows a red <b>FAIL</b> with a message like <code>expected response to have status code 201 but got 400</code>. Change it back to <code>400</code> and save.</li>
+        <li><b>Check the postcondition.</b> Open <b>C-ex (postcondition) No student 2001 was created</b> and send it. It sends <code>GET {{baseUrl}}/students/2001</code> and expects 404, proving the rejected student was not stored.</li>
+      </ol>
+      <div class="note">
+        <p class="label">Why postconditions matter</p>
+        <p>A response only tells you what the server <em>said</em>. A follow-up request tells you what it actually <em>did</em>. Checking postconditions this way is how you verify the data really changed (or didn't).</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-first"><label for="cp-first">I have seen the worked example pass, fail on purpose, and pass again.</label></div>
+    </section>
+
+    <section id="write">
+      <h2><span class="step">STEP 5</span>Write your own tests</h2>
+      <p class="goal">Goal: at least two automated test cases for each of Create, Read, Update and Delete.</p>
+      <p>One test case is one request, plus a follow-up request when you check a postcondition. If you have already designed test cases on paper, automate those. If not, start from the ideas in 5.3.</p>
+
+      <h3>5.1 &#xb7; Add a request to a folder</h3>
+      <ol>
+        <li>In the sidebar, hover over a folder (for example <b>1 Create</b>), click the <b>&#x2026;</b> (View more actions) that appears, and choose <b>Add request</b>.</li>
+        <li>A request named <b>New Request</b> opens. Click its name at the top of the tab and rename it after your test case, for example <code>C1 Create valid student</code>.</li>
+        <li>Pick the <b>method</b> from the dropdown and type the <b>URL</b>, always starting with <code>{{baseUrl}}</code>. The variable turns orange or green when Postman recognizes it.</li>
+        <li>For POST and PUT: click <b>Body</b>, choose <b>raw</b>, then choose <b>JSON</b> in the dropdown at the right end of that row (it may say <b>Text</b> at first). Type the JSON input.</li>
+        <li>Click <b>Scripts &#x2192; Post-response</b> and write the checks (see 5.2).</li>
+        <li>Save, then click <b>Send</b> and read <b>Test Results</b>.</li>
+      </ol>
+      <p>Shortcut: right-click an existing request and choose <b>Duplicate</b>, then rename it and drag it into the right folder. The <b>Snippets</b> list beside the script editor also helps: clicking <b>Status code: Code is 200</b> inserts a ready-made status check you can edit.</p>
+
+      <h3>5.2 &#xb7; Worked example: create a valid student</h3>
+      <p>Request <b>C1 Create valid student</b>: method <code>POST</code>, URL <code>{{baseUrl}}/students</code>, body:</p>
+      <figure class="code"><figcaption><span class="file">C1 &#xb7; Body</span><span class="lang">JSON</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-json">{
+  "id": 2010,
+  "name": "Dana",
+  "age": 21
+}</code></pre></figure>
+      <figure class="code"><figcaption><span class="file">C1 &#xb7; Post-response</span><span class="lang">JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-javascript">pm.test("Status is 201", () =&gt; pm.response.to.have.status(201));
+
+pm.test("Response is the created student", () =&gt; {
+  pm.expect(pm.response.json()).to.eql({ id: 2010, name: "Dana", age: 21 });
+});</code></pre></figure>
+      <p>Then the postcondition, request <b>C1b (postcondition) Student 2010 is stored</b>: method <code>GET</code>, URL <code>{{baseUrl}}/students/2010</code>, no body:</p>
+      <figure class="code"><figcaption><span class="file">C1b &#xb7; Post-response</span><span class="lang">JavaScript</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-javascript">pm.test("Status is 200", () =&gt; pm.response.to.have.status(200));
+
+pm.test("Stored data matches the input", () =&gt; {
+  pm.expect(pm.response.json()).to.eql({ id: 2010, name: "Dana", age: 21 });
+});</code></pre></figure>
+      <p><code>to.eql</code> compares the whole object, field by field, including data types: <code>21</code> and <code>"21"</code> are <b>not</b> equal. A check that only looks at the status code can miss wrong data.</p>
+      <p>If you send C1 twice, the second time returns 409 because student 2010 already exists. That is correct behaviour, not a defect: send <b>Reset test data</b> and try again.</p>
+
+      <h3>5.3 &#xb7; Your turn: Read, Update, Delete and one more Create</h3>
+      <p>Use these request shapes and write the checks yourself:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Operation</th><th>Method</th><th>URL</th><th>Body</th></tr></thead>
+        <tbody>
+          <tr><td><b>Create</b></td><td>POST</td><td><code>{{baseUrl}}/students</code></td><td><code>{"id": &#x2026;, "name": &#x2026;, "age": &#x2026;}</code></td></tr>
+          <tr><td><b>Read</b></td><td>GET</td><td><code>{{baseUrl}}/students/1001</code></td><td>none</td></tr>
+          <tr><td><b>Update</b></td><td>PUT</td><td><code>{{baseUrl}}/students/1003</code></td><td><code>{"name": &#x2026;, "age": &#x2026;}</code></td></tr>
+          <tr><td><b>Delete</b></td><td>DELETE</td><td><code>{{baseUrl}}/students/1002</code></td><td>none</td></tr>
+        </tbody>
+      </table></div>
+      <p>Test ideas taken from the specification. Each covers a valid case, a boundary or an error path:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Operation</th><th>Input</th><th>Expected</th></tr></thead>
+        <tbody>
+          <tr><td><b>Create</b></td><td>An id that already exists, such as 1001</td><td>409; student 1001 unchanged</td></tr>
+          <tr><td><b>Create</b></td><td>A name of exactly 40 characters, then 41</td><td>201, then 400</td></tr>
+          <tr><td><b>Read</b></td><td>Student 1001</td><td>200; body is Alice, 20</td></tr>
+          <tr><td><b>Read</b></td><td>An id that does not exist, such as 9999</td><td>404</td></tr>
+          <tr><td><b>Update</b></td><td>Student 1003 with a new name and age</td><td>200; a follow-up GET shows the new values</td></tr>
+          <tr><td><b>Update</b></td><td>Student 1003 with an <code>id</code> in the body that does not match the URL</td><td>400; student 1003 unchanged</td></tr>
+          <tr><td><b>Delete</b></td><td>Student 1002</td><td>200; a follow-up GET returns 404</td></tr>
+          <tr><td><b>Delete</b></td><td>An id that does not exist</td><td>404</td></tr>
+        </tbody>
+      </table></div>
+      <div class="gate">
+        <p class="label">Keep tests from stepping on each other</p>
+        <p>Requests run top to bottom, and some change data. A simple plan:</p>
+        <ul>
+          <li>Create tests use new ids (2010, 2011, &#x2026;).</li>
+          <li>Read tests use 1001 and an id that does not exist.</li>
+          <li>Update tests use 1003.</li>
+          <li>Delete tests use 1002 and come last.</li>
+        </ul>
+        <p>Then a Delete never removes a student that a later Read expects.</p>
+      </div>
+      <div class="gate">
+        <p class="label">Write each test to the spec, not to what you see</p>
+        <p>Decide the expected result from the specification before you click <b>Send</b>. If build 1.0 disagrees, recheck the specification and your test first; build 1.0 is known to be correct.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-write"><label for="cp-write">I have at least two tests in each of Create, Read, Update and Delete, all saved.</label></div>
+    </section>
+
+    <section id="run">
+      <h2><span class="step">STEP 6</span>Make everything pass on build 1.0</h2>
+      <p class="goal">Goal: every check green on the correct build, so a red check later means a defect, not a bad test.</p>
+      <ol>
+        <li>Send <b>Reset test data</b>.</li>
+        <li>Send every request <b>in order, top to bottom</b>: 1 Create, 2 Read, 3 Update, 4 Delete.</li>
+        <li>Every check must be green. Build 1.0 is correct, so a red check on 1.0 means the <b>test</b> is wrong: a typo in the URL, a wrong expected value, a missing <b>JSON</b> setting on the body, or an earlier request that changed the data. Fix it, save, reset and rerun.</li>
+      </ol>
+      <div class="note">
+        <p class="label">Optional: run the whole collection at once</p>
+        <p>Click the collection name, then <b>Run</b> (or <b>&#x2026; &#x2192; Run collection</b>). The Collection Runner lists all requests with checkboxes in their run order; click the orange <b>Run</b> button. It sends every request and shows pass or fail per request. Your Postman plan may limit how many Runner runs you get per month, so sending requests one by one is always a safe fallback.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-run"><label for="cp-run">Every check passes on build 1.0, in one run from a fresh reset.</label></div>
+    </section>
+
+    <section id="hunt">
+      <h2><span class="step">STEP 7</span>Hunt defects in build 1.1</h2>
+      <p class="goal">Goal: run the same tests, unchanged, against the release candidate and log every failure.</p>
+      <h3>7a &#xb7; Switch to build 1.1</h3>
+      <ol>
+        <li>Click the collection name, then <b>Variables</b>.</li>
+        <li>Change <code>baseUrl</code> to <code>http://localhost:3001</code> (both columns if you see two), and save.</li>
+        <li>Send <b>Reset test data</b>. This resets build 1.1's data, which is separate from build 1.0's.</li>
+        <li>Send every request again, in the same order, <b>without changing any test</b>.</li>
+      </ol>
+      <h3>7b &#xb7; Log every failure</h3>
+      <p>On build 1.1, each red check points to a candidate defect, because the same test passed on the correct build. For each one, look at the response <b>status</b> and <b>Body</b>, and the server window's log line, and write down:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Test (request and input)</th><th>Expected</th><th>Actual on build 1.1</th><th>Checks that failed</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><em>Example of the format, not a real defect:</em> <code>PUT /students/1003</code> with <code>{"name": "Chen", "age": 16}</code></td><td>200, age stored as 16</td><td>400 Bad Request</td><td>U4: Status is 200</td></tr>
+          <tr><td>2</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>3</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table></div>
+      <div class="gate">
+        <p class="label">A good defect entry</p>
+        <ul>
+          <li>Someone else can reproduce it from the request and input alone.</li>
+          <li>The expected result cites the specification, not your opinion.</li>
+          <li>The actual result is copied from the response, not paraphrased.</li>
+        </ul>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-hunt"><label for="cp-hunt">Every red check on build 1.1 is in my defect log.</label></div>
+    </section>
+
+    <section id="wrap">
+      <h2><span class="step">STEP 8</span>Export and wrap up</h2>
+      <p class="goal">Goal: a clean, shareable copy of your test suite.</p>
+      <ol>
+        <li><b>Set <code>baseUrl</code> back to <code>http://localhost:3000</code></b> and save, so whoever opens your collection starts on the correct build.</li>
+        <li><b>Export the collection.</b> In the sidebar, hover over your collection, click <b>&#x2026;</b>, and choose <b>More &#x2192; Export</b>. Save the <code>.postman_collection.json</code> file somewhere safe, or commit it to a Git repository next to the code it tests, so teammates can import and rerun your tests.</li>
+        <li><b>Stop the server</b> with <kbd>Ctrl</kbd>+<kbd>C</kbd> in its terminal window.</li>
+      </ol>
+      <div class="checkpoint"><input type="checkbox" id="cp-wrap"><label for="cp-wrap">The collection is exported with baseUrl set to build 1.0.</label></div>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>Troubleshooting</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>What you see</th><th>Likely cause</th><th>Fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>python</code> is not recognized</td><td>Python not installed or not on PATH</td><td>Try <code>py</code> (Windows) or <code>python3</code> (macOS); otherwise reinstall with <b>Add python.exe to PATH</b> ticked</td></tr>
+          <tr><td>Address already in use when starting the server</td><td>Another program, or a second copy of the server, uses port 3000</td><td>Close the other copy, or run <code>python student_api.py --port 4000</code> and set <code>baseUrl</code> to <code>http://localhost:4000</code> (build 1.1 is then on 4001)</td></tr>
+          <tr><td><b>Could not send request</b> / <code>ECONNREFUSED</code></td><td>Server is not running, or wrong port in <code>baseUrl</code></td><td>Check the server window is still open; check <code>baseUrl</code></td></tr>
+          <tr><td>Error about the Cloud Agent or localhost</td><td>You are using Postman in a web browser</td><td>Use the desktop app</td></tr>
+          <tr><td><code>{{baseUrl}}</code> shows red</td><td>The request is outside the collection, or the variable name is misspelled</td><td>Move the request into a collection folder; check spelling and capitals</td></tr>
+          <tr><td>400 with <code>"request body is not valid JSON"</code> on a valid-looking body</td><td>Body type is <b>Text</b>, or there is a trailing comma</td><td>Choose <b>raw &#x2192; JSON</b>; remove commas after the last field</td></tr>
+          <tr><td>409 on a Create you expect to pass</td><td>The student already exists from an earlier send</td><td>Send <b>Reset test data</b> and rerun from the top</td></tr>
+          <tr><td>A Read test fails after you ran Delete tests</td><td>A Delete removed the student the Read expects</td><td>Reset; use different ids per folder; keep Delete tests last</td></tr>
+          <tr><td><b>Test Results</b> is empty</td><td>Code is in <b>Pre-request</b> instead of <b>Post-response</b>, or not inside <code>pm.test</code></td><td>Move the code; wrap each check in <code>pm.test(...)</code></td></tr>
+          <tr><td><code>SyntaxError</code> in Test Results</td><td>Unbalanced brackets or quotes</td><td>Match every <code>(</code>, <code>{</code> and <code>"</code>; use the <b>Beautify</b> button in the script editor to spot it</td></tr>
+          <tr><td>Edits seem lost or not exported</td><td>Request not saved</td><td>Save after every change</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="cheatsheet">
+      <h2>Assertion cheat sheet</h2>
+      <p>All lines go inside <code>pm.test("name", () =&gt; { ... });</code> in <b>Scripts &#x2192; Post-response</b>. Start with <code>const body = pm.response.json();</code> when you check the body.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>To check that&#x2026;</th><th>Write</th></tr></thead>
+        <tbody>
+          <tr><td>the status code is 201</td><td><code>pm.response.to.have.status(201);</code></td></tr>
+          <tr><td>the whole body equals an object</td><td><code>pm.expect(body).to.eql({ id: 1001, name: "Alice", age: 20 });</code></td></tr>
+          <tr><td>one field has a value</td><td><code>pm.expect(body.name).to.eql("Alice");</code></td></tr>
+          <tr><td>a field is a number</td><td><code>pm.expect(body.age).to.be.a("number");</code></td></tr>
+          <tr><td>a field is a string</td><td><code>pm.expect(body.name).to.be.a("string");</code></td></tr>
+          <tr><td>a string has a length</td><td><code>pm.expect(body.name).to.have.lengthOf(40);</code></td></tr>
+          <tr><td>an error message mentions a word</td><td><code>pm.expect(body.error).to.include("age");</code></td></tr>
+          <tr><td>the body has a field</td><td><code>pm.expect(body).to.have.property("id");</code></td></tr>
+          <tr><td>a value is one of several</td><td><code>pm.expect(pm.response.code).to.be.oneOf([200, 201]);</code></td></tr>
+        </tbody>
+      </table></div>
+      <p>A 40-character name for boundary tests (add one more <code>A</code> for 41):</p>
+      <figure class="code"><figcaption><span class="file">40 characters</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA</code></pre></figure>
+      <p>Full reference: <a href="https://learning.postman.com/docs/tests-and-scripts/write-scripts/test-examples/" target="_blank" rel="noopener">Postman test script examples</a>.</p>
+    </section>
+
+    <footer>
+      Postman's menus and plan limits change often; when this page and the Postman app disagree, trust the app and the official documentation.
+      <p class="copyright">&#xa9; 2026 Yan Shi. All rights reserved.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script>
+(function () {
+  // Syntax highlighting (optional: page reads fine without it)
+  if (window.hljs) {
+    document.querySelectorAll("pre code:not(.nohighlight)").forEach(function (el) {
+      try { window.hljs.highlightElement(el); } catch (e) { /* leave plain */ }
+    });
+  }
+
+  // Copy buttons
+  function selectText(node) {
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  document.querySelectorAll("button.copy").forEach(function (btn) {
+    var original = btn.textContent;
+    btn.addEventListener("click", function () {
+      var code = btn.closest("figure").querySelector("pre code");
+      var text = code.textContent;
+      function flash(msg) {
+        btn.textContent = msg;
+        btn.classList.add("ok");
+        setTimeout(function () { btn.textContent = original; btn.classList.remove("ok"); }, 1600);
+      }
+      function fallback() {
+        selectText(code);
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        flash(ok ? "Copied" : "Selected: press Ctrl+C");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash("Copied"); }, fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+
+  // Per-viewer step checkpoints, mirrored in the rail
+  var KEY = "postman-crud-tutorial-progress";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+  function markRail() {
+    document.querySelectorAll(".checkpoint input").forEach(function (box) {
+      var sec = box.closest("section");
+      var link = sec && document.querySelector('.rail a[href="#' + sec.id + '"] .n');
+      if (!link) return;
+      if (!link.dataset.n) link.dataset.n = link.textContent;
+      link.textContent = box.checked ? "\u2713" : link.dataset.n;
+    });
+  }
+  document.querySelectorAll(".checkpoint input").forEach(function (box) {
+    box.checked = !!state[box.id];
+    box.addEventListener("change", function () {
+      state[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* not saved */ }
+      markRail();
+    });
+  });
+  markRail();
+
+  // Highlight the current section in the rail
+  var links = Array.prototype.slice.call(document.querySelectorAll(".rail a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var i = targets.indexOf(en.target);
+        links.forEach(function (a, j) { a.classList.toggle("active", j === i); });
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    targets.forEach(function (t) { if (t) io.observe(t); });
+  }
+})();
+</script>
+
+</body>
+</html>

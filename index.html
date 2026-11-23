@@ -58,7 +58,7 @@ h2 {
   margin: 40px 0 16px;
 }
 .toc { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; counter-reset: t; }
-.toc li { counter-increment: t; }
+.toc > li { counter-increment: t; }
 .card {
   display: grid; grid-template-columns: 44px 1fr; gap: 4px 14px;
   background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
@@ -107,6 +107,15 @@ footer .copyright { color: var(--ink); margin-top: 12px; }
           <p class="summary">Build and ship a small web app with GitHub Copilot in VS Code at every stage: user stories, a technical spec, code, tests, a Docker image and a GitLab CI/CD pipeline. Learn to use AI tools properly and responsibly, with a human review gate at every step.</p>
           <ul class="meta" aria-label="Details">
             <li>GitHub Copilot</li><li>Python &#xb7; FastAPI</li><li>pytest</li><li>Docker</li><li>GitLab CI/CD</li><li>about 3&#x2013;4 hours</li>
+          </ul>
+        </a>
+      </li>
+      <li>
+        <a class="card" href="api-testing-postman/">
+          <span class="title">Testing a CRUD API with Postman</span>
+          <p class="summary">Turn CRUD test cases into automated Postman tests, prove they pass on a correct build of a Student Enrollment API, then run the same tests against a release candidate to find and log its defects.</p>
+          <ul class="meta" aria-label="Details">
+            <li>Postman</li><li>REST APIs</li><li>Black-box testing</li><li>Regression testing</li><li>about 2 hours</li>
           </ul>
         </a>
       </li>
