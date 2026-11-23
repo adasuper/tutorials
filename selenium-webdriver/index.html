@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Selenium WebDriver Testing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+body { margin: 0; }
+
+/* Layout: engineering-notebook tutorial; sticky step rail on wide screens, one reading column, code blocks as dark "terminal" panes, amber marks every human review gate */
+:root {
+  --bg: #eef2f1;
+  --surface: #ffffff;
+  --ink: #15201d;
+  --muted: #55635f;
+  --line: #d3dcd9;
+  --accent: #0b6b5c;
+  --accent-soft: #d6ebe6;
+  --gate: #8a5a00;
+  --gate-soft: #f8ecd2;
+  --code-bg: #121c1a;
+  --code-fg: #dfe8e5;
+  --code-head: #1b2826;
+  --code-muted: #8ba19b;
+  --prompt-bg: #f6f2fb;
+  --prompt-line: #d8cdea;
+  --prompt-ink: #4b3a6b;
+  --hl-key: #7fd1c0;
+  --hl-str: #f2c879;
+  --hl-num: #f29f8a;
+  --hl-com: #7f948f;
+  --hl-fn: #a9c7ff;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1514; --surface: #161f1d; --ink: #e2eae7; --muted: #9aaaa5; --line: #2a3633;
+    --accent: #55c4ae; --accent-soft: #173a33; --gate: #e5ad48; --gate-soft: #33280f;
+    --code-bg: #0a100f; --code-fg: #dfe8e5; --code-head: #121b19; --code-muted: #8ba19b;
+    --prompt-bg: #1d1a26; --prompt-line: #3b3352; --prompt-ink: #cbbbf0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1514; --surface: #161f1d; --ink: #e2eae7; --muted: #9aaaa5; --line: #2a3633;
+  --accent: #55c4ae; --accent-soft: #173a33; --gate: #e5ad48; --gate-soft: #33280f;
+  --code-bg: #0a100f; --code-fg: #dfe8e5; --code-head: #121b19; --code-muted: #8ba19b;
+  --prompt-bg: #1d1a26; --prompt-line: #3b3352; --prompt-ink: #cbbbf0;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: 17px; line-height: 1.62;
+  padding-inline: 16px; padding-block: 0 64px;
+}
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px;
+}
+
+.shell {
+  max-width: 1180px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr; gap: 40px;
+}
+@media (min-width: 1060px) { .shell { grid-template-columns: 230px minmax(0, 1fr); } }
+
+/* Step rail */
+.rail { display: none; }
+@media (min-width: 1060px) {
+  .rail {
+    display: block; position: sticky; top: env(safe-area-inset-top, 0px);
+    align-self: start; max-height: 100vh; overflow-y: auto; padding-block: 40px 24px;
+  }
+}
+.rail h2 { font-family: var(--font-display); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 12px; }
+.rail ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 2px; }
+.rail a {
+  display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: baseline;
+  padding: 5px 8px; border-radius: 6px; text-decoration: none; color: var(--muted); font-size: 15px; line-height: 1.3;
+}
+.rail a:hover { background: var(--accent-soft); color: var(--ink); }
+.rail a.active { color: var(--ink); background: var(--accent-soft); font-weight: 600; }
+.rail .n { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.rail .done-mark { color: var(--accent); }
+
+.mobile-toc { margin-block: 20px 0; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+.mobile-toc summary { cursor: pointer; padding: 10px 14px; font-weight: 600; }
+.mobile-toc ol { margin: 0; padding: 0 14px 12px 36px; }
+@media (min-width: 1060px) { .mobile-toc { display: none; } }
+
+main { min-width: 0; max-width: 820px; }
+
+/* Header */
+header.hero { padding-block: 48px 24px; border-bottom: 1px solid var(--line); }
+.eyebrow { font-family: var(--font-mono); font-size: 13px; letter-spacing: .04em; color: var(--accent); margin: 0 0 10px; }
+h1 {
+  font-family: var(--font-display); font-weight: 700; font-size: clamp(34px, 6vw, 54px);
+  line-height: 1.04; letter-spacing: -.02em; margin: 0 0 16px; text-wrap: balance;
+}
+.lede { font-size: 20px; color: var(--muted); max-width: 62ch; margin: 0; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 22px 0 0; padding: 0; list-style: none; font-size: 15px; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 600; }
+
+/* Sections */
+section { padding-block: 44px 8px; scroll-margin-top: 16px; }
+h2 {
+  font-family: var(--font-display); font-weight: 700; font-size: 30px; line-height: 1.15;
+  letter-spacing: -.01em; margin: 0 0 14px; text-wrap: balance;
+  display: flex; gap: 14px; align-items: baseline; flex-wrap: wrap;
+}
+h2 .step { font-family: var(--font-mono); font-size: 14px; font-weight: 600; color: var(--accent); letter-spacing: .02em; }
+h3 { font-family: var(--font-display); font-weight: 500; font-size: 21px; margin: 32px 0 8px; text-wrap: balance; }
+p, li { max-width: 68ch; }
+p { margin: 0 0 14px; }
+ul, ol { padding-left: 22px; margin: 0 0 16px; }
+li { margin-bottom: 6px; }
+code:not(pre code) {
+  font-family: var(--font-mono); font-size: .86em; background: var(--accent-soft);
+  padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere;
+}
+kbd { font-family: var(--font-mono); font-size: .82em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: var(--surface); }
+.goal { font-size: 18px; color: var(--muted); }
+
+/* Workflow track */
+.track {
+  list-style: none; padding: 0; margin: 22px 0 10px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;
+}
+.track li {
+  max-width: none; margin: 0; background: var(--surface); border: 1px solid var(--line);
+  border-radius: 8px; padding: 12px 14px; display: grid; gap: 4px; align-content: start;
+}
+.track .k { font-family: var(--font-mono); font-size: 12px; color: var(--accent); }
+.track .t { font-weight: 700; line-height: 1.25; }
+.track .a { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.track .g { font-size: 13.5px; color: var(--gate); line-height: 1.35; border-top: 1px dashed var(--line); padding-top: 6px; margin-top: 4px; }
+.loopnote { font-size: 15px; color: var(--muted); }
+
+/* Code */
+figure { margin: 18px 0 22px; }
+figure.code, figure.prompt { border-radius: 8px; overflow: hidden; }
+figure.code { background: var(--code-bg); }
+figure figcaption {
+  display: flex; align-items: center; gap: 12px; padding: 7px 8px 7px 14px;
+  font-family: var(--font-mono); font-size: 12.5px;
+}
+figure.code figcaption { background: var(--code-head); color: var(--code-muted); }
+figcaption .file { color: var(--code-fg); font-weight: 600; overflow-wrap: anywhere; min-width: 0; }
+figcaption .lang { margin-left: auto; white-space: nowrap; }
+button.copy {
+  font: 600 12.5px var(--font-body); cursor: pointer; border-radius: 5px; padding: 4px 11px;
+  border: 1px solid #3a4b47; background: transparent; color: var(--code-fg); white-space: nowrap;
+}
+button.copy:hover { background: #2a3a37; }
+button.copy.ok { border-color: var(--hl-key); color: var(--hl-key); }
+pre { margin: 0; overflow-x: auto; padding: 14px 16px; }
+pre code { font-family: var(--font-mono); font-size: 13.5px; line-height: 1.6; color: var(--code-fg); white-space: pre; tab-size: 2; }
+
+figure.prompt { background: var(--prompt-bg); border: 1px solid var(--prompt-line); }
+figure.prompt figcaption { color: var(--prompt-ink); border-bottom: 1px solid var(--prompt-line); }
+figure.prompt .mode { font-weight: 600; }
+figure.prompt .cost { margin-left: auto; font-size: 11.5px; opacity: .85; white-space: nowrap; }
+figure.prompt button.copy { color: var(--prompt-ink); border-color: var(--prompt-line); }
+figure.prompt button.copy:hover { background: var(--prompt-line); }
+figure.prompt pre code { color: var(--ink); white-space: pre-wrap; font-size: 13.5px; }
+@media (max-width: 520px) { figure.prompt .cost { display: none; } }
+
+.hljs-keyword, .hljs-selector-tag, .hljs-built_in, .hljs-literal, .hljs-tag .hljs-name, .hljs-meta .hljs-keyword { color: var(--hl-key); }
+.hljs-string, .hljs-attr, .hljs-template-variable, .hljs-variable, .hljs-template-tag { color: var(--hl-str); }
+.hljs-number, .hljs-symbol, .hljs-bullet { color: var(--hl-num); }
+.hljs-comment, .hljs-quote, .hljs-meta { color: var(--hl-com); font-style: italic; }
+.hljs-title, .hljs-section, .hljs-function .hljs-title, .hljs-title.function_, .hljs-attribute { color: var(--hl-fn); }
+.hljs-params, .hljs-subst { color: var(--code-fg); }
+
+/* Callouts */
+.gate, .note {
+  border-radius: 8px; padding: 14px 16px 4px; margin: 20px 0;
+}
+.gate { background: var(--gate-soft); border: 1px solid color-mix(in srgb, var(--gate) 35%, transparent); }
+.note { background: var(--surface); border: 1px solid var(--line); }
+.gate .label, .note .label {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  margin: 0 0 6px; font-weight: 600;
+}
+.gate .label { color: var(--gate); }
+.note .label { color: var(--accent); }
+.gate ul, .note ul { margin-bottom: 10px; }
+
+/* Tables */
+.table-wrap { overflow-x: auto; margin: 16px 0 22px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); font-weight: 500; font-size: 14px; color: var(--muted); background: var(--bg); }
+tr:last-child td { border-bottom: 0; }
+td code { white-space: nowrap; }
+
+/* Pipeline strip */
+.pipeline { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 16px 0 22px; font-family: var(--font-mono); font-size: 13px; }
+.pipeline .job { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px 4px 8px; }
+.pipeline .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.pipeline .job.manual .dot { background: transparent; border: 2px solid var(--gate); }
+.pipeline .arrow { color: var(--muted); }
+
+/* Checkpoint */
+.checkpoint {
+  display: flex; gap: 10px; align-items: center; margin: 26px 0 0; padding: 10px 14px;
+  border: 1px dashed var(--line); border-radius: 8px; font-size: 15px; color: var(--muted);
+}
+.checkpoint input { width: 18px; height: 18px; accent-color: var(--accent); flex: none; }
+.checkpoint label { cursor: pointer; }
+
+.ex { counter-reset: ex; list-style: none; padding: 0; }
+.ex li { counter-increment: ex; position: relative; padding-left: 40px; margin-bottom: 14px; }
+.ex li::before { content: "E" counter(ex); position: absolute; left: 0; top: 1px; font-family: var(--font-mono); font-size: 13px; font-weight: 600; color: var(--accent); }
+
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--line); font-size: 14px; color: var(--muted); }
+footer .copyright { margin: 12px 0 0; color: var(--ink); }
+</style>
+
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Tutorial steps">
+    <h2>Walkthrough</h2>
+    <ol id="rail-list">
+      <li><a href="#overview"><span class="n">&#xb7;&#xb7;</span><span>Overview</span></a></li>
+      <li><a href="#setup"><span class="n">01</span><span>Set up the project</span></a></li>
+      <li><a href="#testcase"><span class="n">02</span><span>Define the first test case</span></a></li>
+      <li><a href="#first"><span class="n">03</span><span>Write the first test</span></a></li>
+      <li><a href="#run"><span class="n">04</span><span>Run and read results</span></a></li>
+      <li><a href="#locators"><span class="n">05</span><span>Find good locators</span></a></li>
+      <li><a href="#fixtures"><span class="n">06</span><span>Fixtures and helpers</span></a></li>
+      <li><a href="#parametrize"><span class="n">07</span><span>Parametrize tests</span></a></li>
+      <li><a href="#controls"><span class="n">08</span><span>More controls and errors</span></a></li>
+      <li><a href="#suite"><span class="n">09</span><span>Run the suite</span></a></li>
+      <li><a href="#apply"><span class="n">10</span><span>Apply it to your app</span></a></li>
+      <li><a href="#troubleshooting"><span class="n">&#xb7;&#xb7;</span><span>Troubleshooting</span></a></li>
+      <li><a href="#references"><span class="n">&#xb7;&#xb7;</span><span>References</span></a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="overview">
+      <p class="eyebrow"><a href="../">&#x2190; All tutorials</a></p>
+      <h1>Web UI testing with Selenium WebDriver and pytest</h1>
+      <p class="lede">You will install Selenium for Python, automate a small web form, and check expected results with pytest. The first script has a single test. The second adds the pytest features a real test suite needs: shared fixtures, helper functions, parametrized tests, assertion messages and expected errors.</p>
+      <ul class="facts">
+        <li><b>Tools</b> Python 3 &#xb7; VS Code &#xb7; Edge or Chrome</li>
+        <li><b>Libraries</b> Selenium WebDriver &#xb7; pytest</li>
+        <li><b>Time</b> about 60&#x2013;90 minutes</li>
+      </ul>
+      <details class="mobile-toc">
+        <summary>Contents</summary>
+        <ol>
+          <li><a href="#setup">Step 1 &#xb7; Set up the project</a></li>
+          <li><a href="#testcase">Step 2 &#xb7; Define the first test case</a></li>
+          <li><a href="#first">Step 3 &#xb7; Write the first test</a></li>
+          <li><a href="#run">Step 4 &#xb7; Run and read results</a></li>
+          <li><a href="#locators">Step 5 &#xb7; Find good locators</a></li>
+          <li><a href="#fixtures">Step 6 &#xb7; Fixtures and helpers</a></li>
+          <li><a href="#parametrize">Step 7 &#xb7; Parametrize tests</a></li>
+          <li><a href="#controls">Step 8 &#xb7; More controls and errors</a></li>
+          <li><a href="#suite">Step 9 &#xb7; Run the suite</a></li>
+          <li><a href="#apply">Step 10 &#xb7; Apply it to your app</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+          <li><a href="#references">References</a></li>
+        </ol>
+      </details>
+    </header>
+
+    <section>
+      <h3 style="margin-top:0">Who this tutorial is for</h3>
+      <p>Undergraduate software engineering students who can write basic Python and want to automate tests for a web user interface. You will learn to turn a written test case into an automated one, and to keep a growing suite of UI tests fast, readable and reliable.</p>
+      <h3>What is Selenium WebDriver</h3>
+      <p>Selenium is an open-source project for automating web browsers. Selenium WebDriver lets Python control a real browser: open a page, find an element, type, click, and read what the page displays. A browser driver connects WebDriver to Edge or Chrome; Selenium Manager, which ships with Selenium, usually finds or downloads that driver for you.</p>
+      <h3>What you will have at the end</h3>
+      <ul>
+        <li>A one-test script that automates a documented test case step by step</li>
+        <li>A 14-test suite that uses fixtures, helpers, parametrized rows and expected exceptions</li>
+        <li>A repeatable way to apply the same pattern to any web application you need to test</li>
+      </ul>
+    </section>
+
+    <section id="setup">
+      <h2><span class="step">STEP 1</span>Set up the project</h2>
+      <p class="goal">Goal: a project folder with its own virtual environment and Selenium and pytest installed.</p>
+      <h3>What you need</h3>
+      <ul>
+        <li><b>Python 3 and VS Code.</b> Check Python with <code>python --version</code> on Windows or <code>python3 --version</code> on macOS and Linux.</li>
+        <li><b>Microsoft Edge or Google Chrome</b>, and an internet connection. The examples use Edge, which is preinstalled on Windows; each code block notes the one-word change for Chrome.</li>
+        <li>No administrator access is needed: packages go into a project virtual environment. On the first run, Selenium Manager may need network access to locate or download a matching browser driver.</li>
+      </ul>
+      <h3>Create the project and install the packages</h3>
+      <p>Create a folder named <code>selenium-lab</code> and open it in VS Code, then open a terminal (<b>Terminal &#x2192; New Terminal</b>). On Windows PowerShell:</p>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; Windows PowerShell</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">mkdir selenium-lab
+cd selenium-lab
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --upgrade pip
+.\.venv\Scripts\python.exe -m pip install selenium pytest
+.\.venv\Scripts\python.exe -m pip show selenium pytest</code></pre></figure>
+      <p>This creates an isolated Python environment in <code>.venv</code> and installs the <code>selenium</code> and <code>pytest</code> packages into it. Calling the environment's <code>python.exe</code> directly works even when PowerShell blocks the activation script. On macOS or Linux:</p>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; macOS / Linux</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">mkdir selenium-lab
+cd selenium-lab
+python3 -m venv .venv
+.venv/bin/python -m pip install --upgrade pip
+.venv/bin/python -m pip install selenium pytest
+.venv/bin/python -m pip show selenium pytest</code></pre></figure>
+      <div class="checkpoint"><input type="checkbox" id="cp-setup"><label for="cp-setup">pip show lists both selenium and pytest for the .venv Python.</label></div>
+    </section>
+
+    <section id="testcase">
+      <h2><span class="step">STEP 2</span>Define the first test case</h2>
+      <p class="goal">Goal: a written test case to automate, so the code has something to be checked against.</p>
+      <p>The application under test is the Selenium project's sample web form at <a href="https://www.selenium.dev/selenium/web/web-form.html" target="_blank" rel="noopener">selenium.dev/selenium/web/web-form.html</a>. It is a practice page built for exactly this purpose. Open it once in your browser and look around.</p>
+      <p>Good automated tests start as written test cases. Writing the steps and the expected result first means the script checks what the application <em>should</em> do, not whatever it happens to do.</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Field</th><th>Example test case</th></tr></thead>
+        <tbody>
+          <tr><td><b>ID</b></td><td>FORM-01</td></tr>
+          <tr><td><b>Purpose</b></td><td>Verify that submitting text displays a confirmation.</td></tr>
+          <tr><td><b>Precondition</b></td><td>The browser can reach the sample web form.</td></tr>
+          <tr><td><b>Steps</b></td><td><ol style="margin:0"><li>Open the form.</li><li>Observe that the page title is "Web form".</li><li>Enter <code>Selenium</code> in <b>Text input</b>.</li><li>Click <b>Submit</b>.</li><li>Verify the page shows the message "Received!".</li></ol></td></tr>
+          <tr><td><b>Expected result</b></td><td>The page shows the message "Received!"</td></tr>
+          <tr><td><b>Actual result</b></td><td>Pass or Fail, recorded after running the script</td></tr>
+        </tbody>
+      </table></div>
+      <div class="checkpoint"><input type="checkbox" id="cp-testcase"><label for="cp-testcase">I have opened the sample form and read the FORM-01 test case.</label></div>
+    </section>
+
+    <section id="first">
+      <h2><span class="step">STEP 3</span>Write the first automated test</h2>
+      <p class="goal">Goal: one pytest test that performs FORM-01 step by step.</p>
+      <p>Create <code>test_web_form.py</code> in the <code>selenium-lab</code> folder and copy this script into it. pytest recognizes files named <code>test_*.py</code> and functions named <code>test_*</code>. Each comment matches a step of the test case.</p>
+      <figure class="code"><figcaption><span class="file">test_web_form.py</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">import pytest
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+
+# A fixture prepares a browser for each test that requests "driver".
+@pytest.fixture
+def driver():
+    browser = webdriver.Edge()  # Change Edge to Chrome if using Chrome.
+    yield browser  # Give the browser to the test; resume below afterward.
+    browser.quit()  # Close it even when the test fails.
+
+
+# pytest finds functions whose names begin with test_.
+def test_form_01_submit_text(driver):
+    # Step 1: Open the form.
+    driver.get("https://www.selenium.dev/selenium/web/web-form.html")
+
+    # Step 2: Observe that the page title is "Web form".
+    assert driver.title == "Web form"  # Fail if the page title differs.
+
+    # Step 3: Enter "Selenium" in the Text input.
+    # Wait up to 10 seconds for the text field to be visible.
+    wait = WebDriverWait(driver, 10)
+    text_box = wait.until(
+        EC.visibility_of_element_located((By.NAME, "my-text"))
+    )  # (By.NAME, value) identifies the field by its HTML name.
+    text_box.send_keys("Selenium")  # Type into the field.
+
+    # Step 4: Click the Submit button.
+    driver.find_element(By.CSS_SELECTOR, "button").click()
+
+    # Step 5: Verify the page shows the message "Received!".
+    # After Submit, locate the visible confirmation by its HTML id.
+    message = wait.until(
+        EC.visibility_of_element_located((By.ID, "message"))
+    )
+    assert message.text == "Received!"  # Compare actual and expected text.</code></pre></figure>
+      <p>Every piece of pytest and Selenium syntax in the script:</p>
+      <ul>
+        <li><code>import pytest</code> and the <code>from selenium ...</code> lines load the two libraries. <code>By</code> names locator strategies; <code>WebDriverWait</code> and <code>EC</code> (expected conditions) wait for the page.</li>
+        <li><code>@pytest.fixture</code> above <code>def driver()</code> marks a setup function. A test receives the fixture's value by listing the fixture name as a parameter: <code>def test_form_01_submit_text(driver)</code>.</li>
+        <li><code>yield browser</code> hands the browser to the test and pauses the fixture. When the test ends, pytest resumes after the <code>yield</code> and runs <code>browser.quit()</code>, even if the test failed.</li>
+        <li><code>driver.get(url)</code> opens a page. <code>find_element(By.NAME, "my-text")</code> finds one element by its HTML <code>name</code>; <code>By.ID</code> and <code>By.CSS_SELECTOR</code> are other strategies. <code>send_keys</code> types and <code>click</code> presses.</li>
+        <li><code>wait.until(EC.visibility_of_element_located(locator))</code> waits up to 10 seconds for the element to appear, then returns it. Use waits instead of <code>time.sleep</code> so tests are fast and stable.</li>
+        <li><code>assert actual == expected</code> compares what the page shows with what the test case expects. A false assertion fails the test and pytest reports the difference.</li>
+      </ul>
+      <div class="note">
+        <p class="label">Copying code</p>
+        <p>Use the <b>Copy</b> button and keep the indentation at four spaces per level. Python treats indentation as part of the syntax.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-first"><label for="cp-first">test_web_form.py is saved in the selenium-lab folder.</label></div>
+    </section>
+
+    <section id="run">
+      <h2><span class="step">STEP 4</span>Run the test and read the result</h2>
+      <p class="goal">Goal: see a pass, cause a failure on purpose, and learn to read pytest's report.</p>
+      <p>From the <code>selenium-lab</code> folder, run the command for your operating system:</p>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; Windows</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">.\.venv\Scripts\python.exe -m pytest -v</code></pre></figure>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; macOS / Linux</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">.venv/bin/python -m pytest -v</code></pre></figure>
+      <p>A browser opens, fills in the form and closes. The terminal output is the evidence of the run. A passing run looks like this:</p>
+      <figure class="code"><figcaption><span class="file">Expected output</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">============================= test session starts =============================
+platform win32 -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0 -- C:\selenium-lab\.venv\Scripts\python.exe
+rootdir: C:\selenium-lab
+collecting ... collected 1 item
+
+test_web_form.py::test_form_01_submit_text PASSED                        [100%]
+
+============================== 1 passed in 14.74s ==============================</code></pre></figure>
+      <p>Now make the test fail on purpose so you learn to read a failure. Change the final expected value from <code>"Received!"</code> to <code>"Wrong result"</code>, save, and run again:</p>
+      <figure class="code"><figcaption><span class="file">Output &#xb7; deliberate failure</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">test_web_form.py::test_form_01_submit_text FAILED                        [100%]
+
+================================== FAILURES ===================================
+__________________________ test_form_01_submit_text ___________________________
+...
+&gt;       assert message.text == "Wrong result"  # Compare actual and expected text.
+E       AssertionError: assert 'Received!' == 'Wrong result'
+E
+E         - Wrong result
+E         + Received!
+
+test_web_form.py:40: AssertionError
+=========================== short test summary info ===========================
+FAILED test_web_form.py::test_form_01_submit_text - AssertionError: assert 'R...
+============================== 1 failed in 15.39s ==============================</code></pre></figure>
+      <ul>
+        <li>The line marked <code>&gt;</code> is the assertion that failed.</li>
+        <li>The <code>E</code> lines show the comparison: the line starting with <code>-</code> is the expected value, and the line starting with <code>+</code> is the actual value from the page.</li>
+        <li>The file name and line number (<code>test_web_form.py:40</code>) tell you where to look.</li>
+      </ul>
+      <p>Restore <code>"Received!"</code> and run again to confirm the test passes.</p>
+      <div class="gate">
+        <p class="label">Always see a test fail once</p>
+        <p>A test you have never seen fail might not be checking anything. Breaking the expected value on purpose proves the assertion runs and that a real difference would be reported.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-run"><label for="cp-run">The test passed, failed on purpose, and passed again.</label></div>
+    </section>
+
+    <section id="locators">
+      <h2><span class="step">STEP 5</span>Find good locators</h2>
+      <p class="goal">Goal: name every locator once, and read its value from the page's HTML.</p>
+      <p>One test is easy; a suite of many tests would repeat the browser setup, the page load and the steps in every function. Steps 5 to 8 build a second file, <code>test_web_form_pytest.py</code>, one piece at a time. Each piece adds some pytest or Selenium syntax, and the complete file is listed at the end of Step 8. Create the file now and add each block as you read.</p>
+      <h3>5a &#xb7; Name URLs and locators once</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; top of the file</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">"""More pytest and Selenium examples using the Selenium sample web form.
+
+Install: python -m pip install selenium pytest
+Run:     python -m pytest -v test_web_form_pytest.py
+"""
+
+import pytest
+from selenium import webdriver
+from selenium.common.exceptions import ElementNotInteractableException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+# Values used by several tests are named once at the top of the file.
+URL = "https://www.selenium.dev/selenium/web/web-form.html"
+
+# A locator is a (By.&lt;strategy&gt;, value) pair. Name it once, reuse it everywhere.
+TEXT_BOX = (By.NAME, "my-text")
+DROPDOWN = (By.NAME, "my-select")
+DISABLED_BOX = (By.CSS_SELECTOR, "input[name='my-disabled']")
+DEFAULT_CHECKBOX = (By.ID, "my-check-2")
+SUBMIT_BUTTON = (By.XPATH, "//button[normalize-space(.)='Submit']")
+MESSAGE = (By.ID, "message")</code></pre></figure>
+      <p>A locator is a pair: <code>(By.&lt;strategy&gt;, value)</code>. Storing it in a constant such as <code>TEXT_BOX</code> keeps the page detail in one place; if the page changes, you edit one line. Four strategies cover most pages:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Strategy</th><th>Matches</th><th>Use it when</th></tr></thead>
+        <tbody>
+          <tr><td><code>By.ID</code></td><td>The element's <code>id</code> attribute</td><td>An id exists. It is the most reliable choice.</td></tr>
+          <tr><td><code>By.NAME</code></td><td>The <code>name</code> attribute</td><td>Form fields, which usually have one</td></tr>
+          <tr><td><code>By.CSS_SELECTOR</code></td><td>CSS syntax, such as <code>input[name='my-disabled']</code> or <code>#my-check-2</code></td><td>You need to combine a tag with an attribute</td></tr>
+          <tr><td><code>By.XPATH</code></td><td>A path through the page, such as <code>//button[normalize-space(.)='Submit']</code></td><td>A control has no id or name, and only its visible text identifies it</td></tr>
+        </tbody>
+      </table></div>
+
+      <h3>5b &#xb7; Find the value for a locator</h3>
+      <p>The value in each pair comes from the page's HTML, which you read with the browser's developer tools. Repeat these steps for every control your tests touch:</p>
+      <ol>
+        <li><b>Inspect the control.</b> Open the form in Edge or Chrome, right-click the <b>Text input</b> box, and choose <b>Inspect</b>. The Elements panel opens with the box's HTML tag highlighted. Hovering over a tag in the panel highlights the matching control on the page, which confirms you are looking at the right element.</li>
+        <li><b>Read the tag.</b> The highlighted line for the Text input box is:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Elements panel &#xb7; Text input</span><span class="lang">HTML</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-xml">&lt;input type="text" class="form-control" name="my-text" id="my-text-id" myprop="myvalue"&gt;</code></pre></figure>
+      <ol start="3">
+        <li><b>Pick an attribute and copy its value exactly</b>, including case and hyphens. The tag has <code>id="my-text-id"</code>, so <code>(By.ID, "my-text-id")</code> works, and it has <code>name="my-text"</code>, so <code>(By.NAME, "my-text")</code> works too; the script uses the second. Values such as <code>class="form-control"</code> are shared by many controls, so they do not identify one element.</li>
+        <li><b>If the tag has no id or name</b>, build a CSS selector or an XPath from what it does have: the tag name, another attribute, or its visible text. The other locators in the script were read from these tags:</li>
+      </ol>
+      <figure class="code"><figcaption><span class="file">Elements panel &#xb7; other controls</span><span class="lang">HTML</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-xml">&lt;input class="form-control" type="text" name="my-disabled" placeholder="Disabled input" disabled&gt;
+&lt;input class="form-check-input" type="checkbox" name="my-check" id="my-check-2"&gt;
+&lt;select class="form-select" name="my-select"&gt; ... &lt;/select&gt;
+&lt;button type="submit" class="btn btn-outline-primary mt-3"&gt;Submit&lt;/button&gt;
+&lt;p class="lead" id="message"&gt;Received!&lt;/p&gt;</code></pre></figure>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Control</th><th>What the tag offers</th><th>Locator in the script</th></tr></thead>
+        <tbody>
+          <tr><td>Disabled input</td><td><code>name="my-disabled"</code></td><td><code>(By.CSS_SELECTOR, "input[name='my-disabled']")</code></td></tr>
+          <tr><td>Default checkbox</td><td><code>id="my-check-2"</code>; the name <code>my-check</code> is shared by two boxes</td><td><code>(By.ID, "my-check-2")</code></td></tr>
+          <tr><td>Dropdown</td><td><code>name="my-select"</code></td><td><code>(By.NAME, "my-select")</code></td></tr>
+          <tr><td>Submit button</td><td>No id or name, only the text <b>Submit</b></td><td><code>(By.XPATH, "//button[normalize-space(.)='Submit']")</code></td></tr>
+          <tr><td>Confirmation message</td><td><code>id="message"</code> on the result page</td><td><code>(By.ID, "message")</code></td></tr>
+        </tbody>
+      </table></div>
+      <div class="gate">
+        <p class="label">Check a locator before you use it</p>
+        <ul>
+          <li><b>It matches exactly one element.</b> In the Elements panel press <kbd>Ctrl</kbd>+<kbd>F</kbd> (<kbd>&#x2318;</kbd>+<kbd>F</kbd> on macOS) and paste the CSS selector or XPath; the search box should report "1 of 1". A locator that matches several elements returns the first one, which is usually not the one you meant.</li>
+          <li><b>It survives layout changes.</b> The right-click <b>Copy &#x2192; Copy selector</b> and <b>Copy XPath</b> commands produce paths such as <code>#main &gt; div:nth-child(3) &gt; button</code> that break as soon as the layout changes. Prefer a short value based on an id, a name or visible text.</li>
+        </ul>
+      </div>
+      <p>The Submit button's relative XPath, <code>//button[normalize-space(.)='Submit']</code>, reads as follows:</p>
+      <ul>
+        <li><code>//button</code>: any <code>button</code> element, anywhere on the page.</li>
+        <li><code>normalize-space(.)</code>: the button's text, with leading and trailing spaces removed and inner whitespace collapsed.</li>
+        <li><code>='Submit'</code>: keep only buttons whose normalized text is exactly "Submit".</li>
+      </ul>
+      <div class="checkpoint"><input type="checkbox" id="cp-locators"><label for="cp-locators">I found each locator's value in the Elements panel, and each matches exactly one element.</label></div>
+    </section>
+
+    <section id="fixtures">
+      <h2><span class="step">STEP 6</span>Share setup with fixtures and helpers</h2>
+      <p class="goal">Goal: one browser for the whole file, a fresh page for every test, and the repeated steps in one function.</p>
+      <h3>6a &#xb7; Share one browser with a module-scoped fixture</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; browser fixture</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">@pytest.fixture(scope="module")
+def browser():
+    """Start one browser for the whole file and close it at the end."""
+    options = webdriver.EdgeOptions()  # webdriver.ChromeOptions() for Chrome.
+    options.add_argument("--headless=new")  # Remove this line to watch the tests.
+    options.add_argument("--window-size=1280,1000")
+    driver = webdriver.Edge(options=options)  # webdriver.Chrome(options=options)
+    try:
+        yield driver  # Tests run here.
+    finally:
+        driver.quit()  # Runs after the last test, even if one failed.</code></pre></figure>
+      <p>The first script started a new browser for every test. With <code>scope="module"</code> the fixture runs once per file: the browser starts before the first test and quits after the last one, which is much faster for a suite of many tests. The <code>try</code>/<code>finally</code> guarantees <code>driver.quit()</code> runs even if a test crashes. Without a scope argument, the default <code>scope="function"</code> runs the fixture again for every test.</p>
+      <p><code>EdgeOptions</code> configures the browser before it starts. <code>--headless=new</code> runs it without a window, which is convenient for repeated runs; remove that line to watch the tests. <code>--window-size</code> gives the page a fixed size, so elements are laid out the same way on every run. Chrome users replace <code>EdgeOptions</code> with <code>ChromeOptions</code> and <code>Edge</code> with <code>Chrome</code>.</p>
+
+      <h3>6b &#xb7; Chain fixtures so every test starts from a known state</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; form fixture</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">@pytest.fixture
+def form(browser):
+    """Open a fresh copy of the form before every test that asks for it."""
+    browser.get(URL)
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located(TEXT_BOX))
+    return browser</code></pre></figure>
+      <p>A fixture may request another fixture by naming it as a parameter, so <code>form</code> receives the shared <code>browser</code>. Because <code>form</code> has the default function scope, it runs before each test that asks for it: it reloads the page, waits for the text box, and returns the browser. Each test that takes <code>form</code> as its parameter begins on a fresh page and cannot be affected by what an earlier test typed or clicked.</p>
+      <div class="gate">
+        <p class="label">Test independence</p>
+        <p>Every test should pass whether it runs alone, first, last or in any order. Sharing an expensive resource (the browser) while resetting cheap state (the page) for every test gives you speed without hidden dependencies between tests.</p>
+      </div>
+
+      <h3>6c &#xb7; Move repeated steps into helper functions</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; helper and first test</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">def submit_text(browser, text):
+    """Type text, click Submit, and return the confirmation message."""
+    browser.find_element(*TEXT_BOX).send_keys(text)
+    wait = WebDriverWait(browser, 10)
+    wait.until(EC.element_to_be_clickable(SUBMIT_BUTTON)).click()
+    return wait.until(EC.visibility_of_element_located(MESSAGE)).text
+
+
+def test_form_02_submit_shows_received(form):
+    actual = submit_text(form, "Selenium")
+    assert actual == "Received!", f"expected 'Received!', got {actual!r}"</code></pre></figure>
+      <p>pytest only collects functions whose names start with <code>test_</code>, so <code>submit_text</code> is an ordinary helper. It performs the steps of a test case (type, click Submit, wait for the message) and returns the value the test needs to check. The test then reads like a test case: perform the action, then compare actual with expected.</p>
+      <ul>
+        <li><code>EC.element_to_be_clickable</code> waits until the button is visible and enabled. Because <code>wait.until</code> returns the element, <code>.click()</code> can be chained onto it.</li>
+        <li><code>.text</code> reads the text displayed inside an element.</li>
+        <li><code>*</code> is Python's argument-unpacking operator. Because <code>TEXT_BOX = (By.NAME, "my-text")</code>, the call <code>find_element(*TEXT_BOX)</code> is expanded to <code>find_element(By.NAME, "my-text")</code>.</li>
+      </ul>
+      <div class="checkpoint"><input type="checkbox" id="cp-fixtures"><label for="cp-fixtures">The file has both fixtures, the helper and test_form_02, and test_form_02 passes.</label></div>
+    </section>
+
+    <section id="parametrize">
+      <h2><span class="step">STEP 7</span>Run one test with many inputs</h2>
+      <p class="goal">Goal: cover several inputs with one function, and make each failure explain itself.</p>
+      <h3>7a &#xb7; Parametrize</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; parametrized tests</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">@pytest.mark.parametrize("text", ["Selenium", "hello world", "12345"])
+def test_form_03_any_text_is_accepted(form, text):
+    actual = submit_text(form, text)
+    assert actual == "Received!", f"{text!r}: expected 'Received!', got {actual!r}"
+
+
+@pytest.mark.parametrize(
+    "text, expected_query",
+    [
+        pytest.param("Selenium", "my-text=Selenium", id="letters"),
+        pytest.param("hello world", "my-text=hello+world", id="space-becomes-plus"),
+        pytest.param("", "my-text=&amp;", id="empty-text"),
+    ],
+)
+def test_form_04_submitted_text_is_in_url(form, text, expected_query):
+    submit_text(form, text)
+    actual_url = form.current_url
+    assert expected_query in actual_url, f"{text!r}: URL was {actual_url}"</code></pre></figure>
+      <p><code>@pytest.mark.parametrize</code> repeats a test once for each row in the list. The first argument is a string naming the parameters, and those names must appear in the test function's parameter list. <code>test_form_03</code> has one parameter, <code>text</code>, and three values, so pytest creates three tests.</p>
+      <p><code>test_form_04</code> shows the form you will use most: two parameters, <code>text</code> and <code>expected_query</code>, with each row wrapped in <code>pytest.param(..., id="...")</code>. The id replaces the raw values in the test name, so the output reads <code>test_form_04_submitted_text_is_in_url[space-becomes-plus]</code>. Choose ids that name the condition being tested.</p>
+      <p>This form sends its values in the page address after Submit, so <code>form.current_url</code> is a second place to check the result. The <code>empty-text</code> row shows that a parametrized test can cover boundary inputs with no extra code.</p>
+      <div class="note">
+        <p class="label">Traceability</p>
+        <p>One written test case becomes one test function or one parametrized row. Either way, its name in the pytest output should let a reader find the matching test case in your test plan, for example by including its ID.</p>
+      </div>
+
+      <h3>7b &#xb7; Explain failures with assertion messages</h3>
+      <p><code>assert condition, message</code> attaches a message that pytest prints when the assertion fails. Build it with an f-string so it names the input and the actual value; <code>!r</code> prints the value with quotes, which makes an empty string or a stray space visible.</p>
+      <p>Here is the output when one expected value in <code>test_form_05</code> (added in Step 8) is deliberately wrong. <code>-k dropdown</code> runs only the tests whose names contain "dropdown", and <code>--tb=short</code> shortens the traceback:</p>
+      <figure class="code"><figcaption><span class="file">Output &#xb7; one wrong row</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">C:\selenium-lab&gt; .\.venv\Scripts\python.exe -m pytest -v -k dropdown --tb=short
+collecting ... collected 14 items / 11 deselected / 3 selected
+
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[first-option] PASSED [ 33%]
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[second-option] PASSED [ 66%]
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[third-option] FAILED [100%]
+
+================================== FAILURES ===================================
+____________ test_form_05_dropdown_selects_option[third-option] ______________
+test_web_form_pytest.py:92: in test_form_05_dropdown_selects_option
+    assert actual_value == expected_value, f"{option_text}: got {actual_value!r}"
+E   AssertionError: Three: got '3'
+E   assert '3' == '2'
+E
+E     - 2
+E     + 3
+=========================== short test summary info ===========================
+FAILED test_web_form_pytest.py::test_form_05_dropdown_selects_option[third-option]
+================= 1 failed, 2 passed, 11 deselected in 15.36s =================</code></pre></figure>
+      <p>The message <code>Three: got '3'</code> tells you which input failed without opening the code. The other rows of the same parametrized test still pass, which is why one row per test case is useful: a single wrong expectation does not hide the results of the others.</p>
+      <div class="checkpoint"><input type="checkbox" id="cp-parametrize"><label for="cp-parametrize">pytest lists three rows for test_form_03 and three named rows for test_form_04, all passing.</label></div>
+    </section>
+
+    <section id="controls">
+      <h2><span class="step">STEP 8</span>Test more controls and expected errors</h2>
+      <p class="goal">Goal: work with dropdowns, checkboxes and field values, and test that the page refuses invalid actions.</p>
+      <h3>8a &#xb7; Dropdowns, checkboxes and field values</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; more controls</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">@pytest.mark.parametrize(
+    "option_text, expected_value",
+    [
+        pytest.param("One", "1", id="first-option"),
+        pytest.param("Two", "2", id="second-option"),
+        pytest.param("Three", "3", id="third-option"),
+    ],
+)
+def test_form_05_dropdown_selects_option(form, option_text, expected_value):
+    dropdown = Select(form.find_element(*DROPDOWN))
+    dropdown.select_by_visible_text(option_text)
+    actual_value = dropdown.first_selected_option.get_attribute("value")
+    assert actual_value == expected_value, f"{option_text}: got {actual_value!r}"
+
+
+def test_form_06_checkbox_toggles_on_click(form):
+    checkbox = form.find_element(*DEFAULT_CHECKBOX)
+    assert not checkbox.is_selected()  # Starts unchecked.
+    checkbox.click()
+    assert checkbox.is_selected()  # One click checks it.
+    checkbox.click()
+    assert not checkbox.is_selected()  # A second click clears it.
+
+
+def test_form_07_text_box_keeps_typed_value(form):
+    text_box = form.find_element(*TEXT_BOX)
+    text_box.send_keys("abc")
+    assert text_box.get_attribute("value") == "abc"  # Input fields use "value".
+    text_box.clear()
+    assert text_box.get_attribute("value") == ""</code></pre></figure>
+      <ul>
+        <li><code>Select</code> wraps an HTML dropdown. <code>select_by_visible_text("Two")</code> picks an option by its label, <code>select_by_value("2")</code> by its <code>value</code> attribute, and <code>first_selected_option</code> returns the chosen option element.</li>
+        <li><code>is_selected()</code> reports whether a checkbox or radio button is checked; <code>click()</code> toggles it. <code>is_displayed()</code> and <code>is_enabled()</code> are the other two state checks.</li>
+        <li><code>.text</code> returns the text displayed inside an element such as a heading, label or result panel. What a user typed into an input box is not text: read it with <code>get_attribute("value")</code>. <code>clear()</code> empties an input box.</li>
+        <li>Each of these tests asserts more than once. pytest stops a test at its first failing assertion, so put the most basic check first.</li>
+      </ul>
+
+      <h3>8b &#xb7; Test error handling with expected errors</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; expected exception</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">def test_form_08_disabled_field_rejects_input(form):
+    disabled = form.find_element(*DISABLED_BOX)
+    assert not disabled.is_enabled()
+    with pytest.raises(ElementNotInteractableException):
+        disabled.send_keys("should fail")  # Passes only if this line raises.</code></pre></figure>
+      <p>Requirements about error handling take two forms in a test:</p>
+      <ul>
+        <li><b>The application shows a message</b>, for example "Error" or "Invalid input". Read the message element and assert its <code>.text</code>, exactly as <code>test_form_02</code> asserts "Received!".</li>
+        <li><b>The application refuses the action</b>, and Selenium raises an exception. <code>with pytest.raises(...)</code> makes that the expected outcome: the test passes only if the code inside the <code>with</code> block raises the named exception, and fails if nothing is raised. Typing into a disabled field raises <code>ElementNotInteractableException</code>, imported from <code>selenium.common.exceptions</code> at the top of the file.</li>
+      </ul>
+      <div class="note">
+        <p class="label">Negative tests</p>
+        <p>Testing only the happy path leaves half the requirements unchecked. For every input a user can get wrong, plan at least one test that confirms the application rejects it clearly.</p>
+      </div>
+
+      <h3>8c &#xb7; Let the file run itself</h3>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py &#xb7; bottom of the file</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">if __name__ == "__main__":
+    raise SystemExit(pytest.main([__file__, "-v"]))</code></pre></figure>
+      <p>With this block at the bottom, the file can also be run with the VS Code Run button or with <code>python test_web_form_pytest.py</code>. <code>pytest.main</code> runs pytest on this file only and returns its exit code, which <code>SystemExit</code> passes on to the terminal. <code>python -m pytest</code> still works and is the normal way to run the whole suite.</p>
+
+      <h3>8d &#xb7; The complete second script</h3>
+      <p>Your <code>test_web_form_pytest.py</code> should now match this listing. Compare it with yours if a test does not run.</p>
+      <figure class="code"><figcaption><span class="file">test_web_form_pytest.py</span><span class="lang">Python</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-python">"""More pytest and Selenium examples using the Selenium sample web form.
+
+Install: python -m pip install selenium pytest
+Run:     python -m pytest -v test_web_form_pytest.py
+"""
+
+import pytest
+from selenium import webdriver
+from selenium.common.exceptions import ElementNotInteractableException
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+# Values used by several tests are named once at the top of the file.
+URL = "https://www.selenium.dev/selenium/web/web-form.html"
+
+# A locator is a (By.&lt;strategy&gt;, value) pair. Name it once, reuse it everywhere.
+TEXT_BOX = (By.NAME, "my-text")
+DROPDOWN = (By.NAME, "my-select")
+DISABLED_BOX = (By.CSS_SELECTOR, "input[name='my-disabled']")
+DEFAULT_CHECKBOX = (By.ID, "my-check-2")
+SUBMIT_BUTTON = (By.XPATH, "//button[normalize-space(.)='Submit']")
+MESSAGE = (By.ID, "message")
+
+
+@pytest.fixture(scope="module")
+def browser():
+    """Start one browser for the whole file and close it at the end."""
+    options = webdriver.EdgeOptions()  # webdriver.ChromeOptions() for Chrome.
+    options.add_argument("--headless=new")  # Remove this line to watch the tests.
+    options.add_argument("--window-size=1280,1000")
+    driver = webdriver.Edge(options=options)  # webdriver.Chrome(options=options)
+    try:
+        yield driver  # Tests run here.
+    finally:
+        driver.quit()  # Runs after the last test, even if one failed.
+
+
+@pytest.fixture
+def form(browser):
+    """Open a fresh copy of the form before every test that asks for it."""
+    browser.get(URL)
+    WebDriverWait(browser, 10).until(EC.visibility_of_element_located(TEXT_BOX))
+    return browser
+
+
+def submit_text(browser, text):
+    """Type text, click Submit, and return the confirmation message."""
+    browser.find_element(*TEXT_BOX).send_keys(text)
+    wait = WebDriverWait(browser, 10)
+    wait.until(EC.element_to_be_clickable(SUBMIT_BUTTON)).click()
+    return wait.until(EC.visibility_of_element_located(MESSAGE)).text
+
+
+def test_form_02_submit_shows_received(form):
+    actual = submit_text(form, "Selenium")
+    assert actual == "Received!", f"expected 'Received!', got {actual!r}"
+
+
+@pytest.mark.parametrize("text", ["Selenium", "hello world", "12345"])
+def test_form_03_any_text_is_accepted(form, text):
+    actual = submit_text(form, text)
+    assert actual == "Received!", f"{text!r}: expected 'Received!', got {actual!r}"
+
+
+@pytest.mark.parametrize(
+    "text, expected_query",
+    [
+        pytest.param("Selenium", "my-text=Selenium", id="letters"),
+        pytest.param("hello world", "my-text=hello+world", id="space-becomes-plus"),
+        pytest.param("", "my-text=&amp;", id="empty-text"),
+    ],
+)
+def test_form_04_submitted_text_is_in_url(form, text, expected_query):
+    submit_text(form, text)
+    actual_url = form.current_url
+    assert expected_query in actual_url, f"{text!r}: URL was {actual_url}"
+
+
+@pytest.mark.parametrize(
+    "option_text, expected_value",
+    [
+        pytest.param("One", "1", id="first-option"),
+        pytest.param("Two", "2", id="second-option"),
+        pytest.param("Three", "3", id="third-option"),
+    ],
+)
+def test_form_05_dropdown_selects_option(form, option_text, expected_value):
+    dropdown = Select(form.find_element(*DROPDOWN))
+    dropdown.select_by_visible_text(option_text)
+    actual_value = dropdown.first_selected_option.get_attribute("value")
+    assert actual_value == expected_value, f"{option_text}: got {actual_value!r}"
+
+
+def test_form_06_checkbox_toggles_on_click(form):
+    checkbox = form.find_element(*DEFAULT_CHECKBOX)
+    assert not checkbox.is_selected()  # Starts unchecked.
+    checkbox.click()
+    assert checkbox.is_selected()  # One click checks it.
+    checkbox.click()
+    assert not checkbox.is_selected()  # A second click clears it.
+
+
+def test_form_07_text_box_keeps_typed_value(form):
+    text_box = form.find_element(*TEXT_BOX)
+    text_box.send_keys("abc")
+    assert text_box.get_attribute("value") == "abc"  # Input fields use "value".
+    text_box.clear()
+    assert text_box.get_attribute("value") == ""
+
+
+def test_form_08_disabled_field_rejects_input(form):
+    disabled = form.find_element(*DISABLED_BOX)
+    assert not disabled.is_enabled()
+    with pytest.raises(ElementNotInteractableException):
+        disabled.send_keys("should fail")  # Passes only if this line raises.
+
+
+if __name__ == "__main__":
+    raise SystemExit(pytest.main([__file__, "-v"]))</code></pre></figure>
+      <h3>The pytest syntax in this tutorial, in one place</h3>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Syntax</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>def test_name(...)</code> in a file named <code>test_*.py</code></td><td>A test. pytest collects it automatically; other functions are helpers.</td></tr>
+          <tr><td><code>assert actual == expected, message</code></td><td>Checks a result. A false condition fails the test and prints the message and the difference.</td></tr>
+          <tr><td><code>@pytest.fixture</code> above a function</td><td>Setup code. A test or another fixture receives its value by naming it as a parameter.</td></tr>
+          <tr><td><code>yield value</code> inside a fixture</td><td>Gives the value to the test; the code after <code>yield</code> runs as cleanup when the test ends.</td></tr>
+          <tr><td><code>@pytest.fixture(scope="module")</code></td><td>Runs the fixture once per file instead of once per test.</td></tr>
+          <tr><td><code>@pytest.mark.parametrize("a, b", [rows])</code></td><td>Repeats the test once per row, passing the row values as parameters <code>a</code> and <code>b</code>.</td></tr>
+          <tr><td><code>pytest.param(values, id="name")</code></td><td>One row of a parametrize list, with a readable name shown in the output.</td></tr>
+          <tr><td><code>with pytest.raises(SomeException):</code></td><td>Passes only if the block raises that exception; fails if it does not.</td></tr>
+          <tr><td><code>pytest.main([__file__, "-v"])</code></td><td>Runs pytest from inside the script, so the file can be run directly.</td></tr>
+        </tbody>
+      </table></div>
+      <div class="checkpoint"><input type="checkbox" id="cp-controls"><label for="cp-controls">test_web_form_pytest.py matches the complete listing.</label></div>
+    </section>
+
+    <section id="suite">
+      <h2><span class="step">STEP 9</span>Run the suite and select tests</h2>
+      <p class="goal">Goal: run all 14 tests, then learn to run only the ones you are working on.</p>
+      <p>With both files in the folder, <code>python -m pytest -v</code> collects every <code>test_*.py</code> file and runs every test, printing one line per test and a final summary:</p>
+      <figure class="code"><figcaption><span class="file">Expected output &#xb7; full suite</span><span class="lang">Text</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-plaintext nohighlight">============================= test session starts =============================
+platform win32 -- Python 3.13.14, pytest-9.1.1, pluggy-1.6.0 -- C:\selenium-lab\.venv\Scripts\python.exe
+rootdir: C:\selenium-lab
+collecting ... collected 14 items
+
+test_web_form.py::test_form_01_submit_text PASSED                        [  7%]
+test_web_form_pytest.py::test_form_02_submit_shows_received PASSED       [ 14%]
+test_web_form_pytest.py::test_form_03_any_text_is_accepted[Selenium] PASSED [ 21%]
+test_web_form_pytest.py::test_form_03_any_text_is_accepted[hello world] PASSED [ 28%]
+test_web_form_pytest.py::test_form_03_any_text_is_accepted[12345] PASSED [ 35%]
+test_web_form_pytest.py::test_form_04_submitted_text_is_in_url[letters] PASSED [ 42%]
+test_web_form_pytest.py::test_form_04_submitted_text_is_in_url[space-becomes-plus] PASSED [ 50%]
+test_web_form_pytest.py::test_form_04_submitted_text_is_in_url[empty-text] PASSED [ 57%]
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[first-option] PASSED [ 64%]
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[second-option] PASSED [ 71%]
+test_web_form_pytest.py::test_form_05_dropdown_selects_option[third-option] PASSED [ 78%]
+test_web_form_pytest.py::test_form_06_checkbox_toggles_on_click PASSED   [ 85%]
+test_web_form_pytest.py::test_form_07_text_box_keeps_typed_value PASSED  [ 92%]
+test_web_form_pytest.py::test_form_08_disabled_field_rejects_input PASSED [100%]
+
+============================= 14 passed in 23.70s =============================</code></pre></figure>
+      <p>While you work, run only what you need. Add these options after <code>python -m pytest -v</code>:</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Option</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>test_web_form_pytest.py</code></td><td>Run one file.</td></tr>
+          <tr><td><code>test_web_form_pytest.py::test_form_06_checkbox_toggles_on_click</code></td><td>Run one test by name.</td></tr>
+          <tr><td><code>-k dropdown</code></td><td>Run tests whose names contain a word; <code>-k "form_05 or form_06"</code> combines names.</td></tr>
+          <tr><td><code>-x</code></td><td>Stop at the first failure.</td></tr>
+          <tr><td><code>--tb=short</code></td><td>Shorter failure output, as in Step 7.</td></tr>
+          <tr><td><code>-q</code></td><td>Quiet: one character per test and the summary line.</td></tr>
+          <tr><td><code>--collect-only</code></td><td>List the tests without running them; check that every parametrized row appears.</td></tr>
+        </tbody>
+      </table></div>
+      <h3>Keep evidence of each run</h3>
+      <p>A test report should show which tests ran and what happened, so anyone can check a result later. Run the complete suite with <code>-v</code> and keep the output: save it to a text file, or write a JUnit XML report, which CI servers and test-management tools can read.</p>
+      <figure class="code"><figcaption><span class="file">Terminal &#xb7; save the results</span><span class="lang">Terminal</span><button class="copy" type="button">Copy</button></figcaption><pre><code class="language-bash">python -m pytest -v &gt; result.txt
+python -m pytest -v --junitxml=report.xml</code></pre></figure>
+      <div class="checkpoint"><input type="checkbox" id="cp-suite"><label for="cp-suite">All 14 tests pass, and I have run a single test with -k.</label></div>
+    </section>
+
+    <section id="apply">
+      <h2><span class="step">STEP 10</span>Apply the pattern to your own application</h2>
+      <p class="goal">Goal: a repeatable process for testing any web application, not just the sample form.</p>
+      <ol>
+        <li><b>Write the test cases before you look at the implementation.</b> Derive each test case's input, steps and expected result from the requirements. Tests written by watching what the application does tend to accept its defects as correct behaviour.</li>
+        <li><b>Then find the locators.</b> Open the application and use <b>Inspect</b> to find reliable locators for its controls and its result display. Do not assume the sample form's locators apply to another page.</li>
+        <li><b>Map test cases to tests one to one.</b> Create one test function, or one parametrized row, per written test case, with the test case ID recognizable in the function name or the <code>pytest.param</code> id. Keep the documented input, steps and expected result aligned with the code.</li>
+        <li><b>Start every test from a known state.</b> Use a module-scoped browser fixture and a function-scoped fixture that reloads the page or resets the application. Put repeated steps in helper functions that return the displayed result.</li>
+        <li><b>Test through the user interface.</b> Enter input through the page controls, read the result the page displays, and assert the value the test case expects. Never compute the expected value in Python inside the test: if the test uses the same logic as the application, it will repeat the application's mistakes. Use waits wherever the result updates asynchronously.</li>
+        <li><b>Treat a failure as information.</b> When a test fails because the application is wrong, do not change the expectation to make it pass. Record the actual result, report the defect, and keep the expectation tied to the requirement.</li>
+        <li><b>Run the whole suite often</b> with <code>python -m pytest -v</code>, and keep the results so each automated test can be traced to its test case and each failure to a defect report.</li>
+      </ol>
+      <div class="gate">
+        <p class="label">Using AI coding tools to write Selenium tests</p>
+        <p>AI assistants can draft Selenium tests quickly, but they do not know your requirements. Give them the exact test cases with their steps and expected results, then review every generated test against those test cases: check the locators in the browser, check that each assertion matches the documented expected result, and see each test fail once. Edit whatever does not match. You are responsible for the tests you keep.</p>
+      </div>
+      <div class="checkpoint"><input type="checkbox" id="cp-apply"><label for="cp-apply">I can describe how I would test a new web page from its requirements.</label></div>
+    </section>
+
+    <section id="troubleshooting">
+      <h2>Troubleshooting</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Symptom</th><th>Likely cause and fix</th></tr></thead>
+        <tbody>
+          <tr><td><code>ModuleNotFoundError</code></td><td>pytest is running with a different Python. Run it with the <code>.venv</code> Python as shown above, and check that <code>pip show selenium pytest</code> succeeds for that interpreter.</td></tr>
+          <tr><td>Browser does not launch</td><td>Update Edge or Chrome, confirm it opens normally, and check network access for Selenium Manager on the first run. Match <code>webdriver.Edge()</code> or <code>webdriver.Chrome()</code> to the installed browser.</td></tr>
+          <tr><td><code>NoSuchElementException</code> or <code>TimeoutException</code></td><td>Inspect the current page and the locator: check that the page loaded, the intended element exists, and the wait condition fits the behaviour. Avoid arbitrary <code>time.sleep</code> delays.</td></tr>
+          <tr><td>No tests ran, or fewer than expected</td><td>Name the file with a <code>test_</code> prefix, run pytest from the folder that contains it, and use <code>--collect-only</code> to list what pytest found. Each parametrized row counts as one test.</td></tr>
+          <tr><td><code>fixture 'form' not found</code></td><td>The parameter name in the test must match a fixture function name exactly, and the fixture must be in the same file (or in a <code>conftest.py</code>).</td></tr>
+          <tr><td><code>SyntaxError</code> or <code>IndentationError</code> after copying code</td><td>Re-indent with spaces only, and replace curly quotes with straight quotes.</td></tr>
+          <tr><td><code>StaleElementReferenceException</code></td><td>The element was found before the page changed. Find it again after a click or page load instead of reusing the old variable.</td></tr>
+          <tr><td><code>ElementClickInterceptedException</code>, or a click that does nothing</td><td>Wait with <code>EC.element_to_be_clickable</code>, set a window size, or scroll the element into view.</td></tr>
+          <tr><td>Tests pass alone but fail together</td><td>With a module-scoped browser, an earlier test left state behind. Make the per-test fixture reload the page or reset the application.</td></tr>
+          <tr><td>A headless run fails but a visible run passes</td><td>Add <code>driver.save_screenshot("fail.png")</code> before the failing assertion and open the image to see what the browser showed.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="references">
+      <h2>References</h2>
+      <ul>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/getting_started/install_library/" target="_blank" rel="noopener">Selenium: install a library</a></li>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/getting_started/first_script/" target="_blank" rel="noopener">Selenium: first script and sample form</a></li>
+        <li><a href="https://www.selenium.dev/documentation/selenium_manager/" target="_blank" rel="noopener">Selenium Manager</a></li>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/elements/locators/" target="_blank" rel="noopener">Locator strategies</a></li>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/support_features/expected_conditions/" target="_blank" rel="noopener">Waiting for conditions</a></li>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/support_features/select_lists/" target="_blank" rel="noopener">Select lists</a></li>
+        <li><a href="https://www.selenium.dev/documentation/webdriver/drivers/options/" target="_blank" rel="noopener">Browser options</a></li>
+        <li><a href="https://docs.pytest.org/en/stable/getting-started.html" target="_blank" rel="noopener">pytest: getting started</a></li>
+        <li><a href="https://docs.pytest.org/en/stable/how-to/fixtures.html" target="_blank" rel="noopener">pytest: fixtures</a></li>
+        <li><a href="https://docs.pytest.org/en/stable/how-to/parametrize.html" target="_blank" rel="noopener">pytest: parametrize</a></li>
+        <li><a href="https://docs.pytest.org/en/stable/how-to/assert.html" target="_blank" rel="noopener">pytest: assertions and pytest.raises</a></li>
+        <li><a href="https://docs.pytest.org/en/stable/how-to/usage.html" target="_blank" rel="noopener">pytest: running and selecting tests</a></li>
+      </ul>
+    </section>
+
+    <footer>
+      Selenium, pytest and browser versions change often; when this page and the official documentation disagree, trust the documentation.
+      <p class="copyright">&#xa9; 2026 Yan Shi. All rights reserved.</p>
+    </footer>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dockerfile.min.js"></script>
+<script>
+(function () {
+  // Syntax highlighting (optional: page reads fine without it)
+  if (window.hljs) {
+    document.querySelectorAll("pre code:not(.nohighlight)").forEach(function (el) {
+      try { window.hljs.highlightElement(el); } catch (e) { /* leave plain */ }
+    });
+  }
+
+  // Copy buttons
+  function selectText(node) {
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  document.querySelectorAll("button.copy").forEach(function (btn) {
+    var original = btn.textContent;
+    btn.addEventListener("click", function () {
+      var code = btn.closest("figure").querySelector("pre code");
+      var text = code.textContent;
+      function flash(msg) {
+        btn.textContent = msg;
+        btn.classList.add("ok");
+        setTimeout(function () { btn.textContent = original; btn.classList.remove("ok"); }, 1600);
+      }
+      function fallback() {
+        selectText(code);
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        flash(ok ? "Copied" : "Selected: press Ctrl+C");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () { flash("Copied"); }, fallback);
+      } else {
+        fallback();
+      }
+    });
+  });
+
+  // Per-viewer step checkpoints, mirrored in the rail
+  var KEY = "selenium-tutorial-progress";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { state = {}; }
+  function markRail() {
+    document.querySelectorAll(".checkpoint input").forEach(function (box) {
+      var sec = box.closest("section");
+      var link = sec && document.querySelector('.rail a[href="#' + sec.id + '"] .n');
+      if (!link) return;
+      if (!link.dataset.n) link.dataset.n = link.textContent;
+      link.textContent = box.checked ? "\u2713" : link.dataset.n;
+    });
+  }
+  document.querySelectorAll(".checkpoint input").forEach(function (box) {
+    box.checked = !!state[box.id];
+    box.addEventListener("change", function () {
+      state[box.id] = box.checked;
+      try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* not saved */ }
+      markRail();
+    });
+  });
+  markRail();
+
+  // Highlight the current section in the rail
+  var links = Array.prototype.slice.call(document.querySelectorAll(".rail a"));
+  var targets = links.map(function (a) { return document.querySelector(a.getAttribute("href")); });
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        var i = targets.indexOf(en.target);
+        links.forEach(function (a, j) { a.classList.toggle("active", j === i); });
+      });
+    }, { rootMargin: "-20% 0px -70% 0px" });
+    targets.forEach(function (t) { if (t) io.observe(t); });
+  }
+})();
+</script>
+
+</body>
+</html>

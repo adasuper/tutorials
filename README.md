@@ -8,6 +8,7 @@ Browse them at **https://adasuper.github.io/tutorials/**.
 |---|----------|--------|
 | 01 | [AI-aided software development, from spec to deployment](https://adasuper.github.io/tutorials/ai-aided-development/) | Using AI tools properly and responsibly: GitHub Copilot, Python/FastAPI, pytest, Docker, GitLab CI/CD |
 | 02 | [Testing a CRUD API with Postman](https://adasuper.github.io/tutorials/api-testing-postman/) | Black-box and regression testing of a REST API with automated Postman tests |
+| 03 | [Web UI testing with Selenium WebDriver and pytest](https://adasuper.github.io/tutorials/selenium-webdriver/) | Browser test automation with Selenium for Python: locators, waits, fixtures, parametrized tests |
 
 ## Credits
 
